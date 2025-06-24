@@ -1,8 +1,10 @@
 import os
-
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from dotenv import load_dotenv
+from typing import  Annotated
+from sqlalchemy.orm import Session
+from fastapi import  Depends
 
 load_dotenv()
 
@@ -26,3 +28,4 @@ database_url = f"mysql+pymysql://{USER}:{PASSWORD}@{HOST}:{PORT}/{DB_NAME}"# mys
 engine = create_engine(database_url)
 sessionLocal = sessionmaker(autoflush=False, autocommit=False, bind=engine)
 base = declarative_base()
+db_dependency = Annotated[Session, Depends(get_db)]
