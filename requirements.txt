@@ -20,3 +20,4 @@ pymysql
 python-jose[cryptography]
 cryptography
 python-multipart
+alembic

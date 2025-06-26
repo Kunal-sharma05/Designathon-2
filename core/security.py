@@ -5,7 +5,7 @@ from fastapi import Depends, HTTPException, status
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
-from db.database import sessionLocal
+from db.database import sessionLocal, db_dependency
 from model.user import UserDetails as user_model
 from jose import jwt, JWTError
 from fastapi.security import OAuth2PasswordBearer
@@ -19,16 +19,6 @@ ALGORITHM = os.getenv("ALGORITHM")
 bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
 Oauth2_bearer = OAuth2PasswordBearer(tokenUrl="/token")
-
-def get_db():
-    db = sessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-db_dependency = Annotated[Session, Depends(get_db)]
 
 
 async def authenticate_user(email: str, password: str, db: db_dependency):

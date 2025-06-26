@@ -5,17 +5,40 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="72ad22ff-a087-495b-b326-f10a210aebb5" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/crud/job_description.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/model/job_description.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/router/job_description.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/schema/job_description.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/utility/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/utility/logging_config.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/crud/ConsultantProfile.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/crud/JobDescription.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/crud/MatchResult.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/crud/Notification.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/crud/WorkflowStatus.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/model/ConsultantProfile.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/model/JobDescription.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/model/MatchResult.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/model/Notification.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/model/WorkflowStatus.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/router/ConsultantProfile.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/router/JobDescription.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/router/MatchResult.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/router/Notification.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/router/WorkflowStatus.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/schema/ConsultantProfile.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/schema/JobDescription.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/schema/MatchResult.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/schema/Notification.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/schema/WorkflowStatus.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/crud/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/crud/user.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/db/database.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/security.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/security.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/crud/job_description.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model/job_description.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/model/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/user.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model/user_role.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/user_role.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/router/job_description.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/router/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/router/user.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/schema/job_description.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/schema/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/schema/user.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/uv.lock" beforeDir="false" afterPath="$PROJECT_DIR$/uv.lock" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,16 +72,16 @@
     "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "main",
-    "last_opened_file_path": "C:/Users/2000123553/PycharmProjects/softskillsenhancement"
+    "last_opened_file_path": "C:/Users/2000123553/PycharmProjects/Disignathon/model"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\2000123553\PycharmProjects\Disignathon\model" />
       <recent name="C:\Users\2000123553\PycharmProjects\Disignathon" />
       <recent name="C:\Users\2000123553\PycharmProjects\Disignathon\router" />
       <recent name="C:\Users\2000123553\PycharmProjects\Disignathon\schema" />
       <recent name="C:\Users\2000123553\PycharmProjects\Disignathon\core" />
-      <recent name="C:\Users\2000123553\PycharmProjects\Disignathon\crud" />
     </key>
   </component>
   <component name="SharedIndexes">

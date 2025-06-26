@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, status, HTTPException, Query, Path
 from crud import user as user_service
 from sqlalchemy.orm import Session
 from typing import Annotated
-from db.database import sessionLocal
+from db.database import sessionLocal, db_dependency
 from core import security
 from fastapi.security import OAuth2PasswordRequestForm
 from schema.token import Token
@@ -12,17 +12,6 @@ from model.user import UserDetails
 from utility.logging_config import logger
 
 router = APIRouter()
-
-
-def get_db():
-    db = sessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-db_dependency = Annotated[Session, Depends(get_db)]
 
 
 # GET method
@@ -119,7 +108,7 @@ async def login_form(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 
 # Verify Email method
 @router.post("/verify-email", status_code=status.HTTP_200_OK)
-async def verify_email(email: str, db: Session = Depends(get_db)):
+async def verify_email(email: str, db: db_dependency):
     try:
         logger.debug(f"Verifying email: {email}.")
         user = db.query(UserDetails).filter(UserDetails.email == email).first()
@@ -140,7 +129,7 @@ async def verify_email(email: str, db: Session = Depends(get_db)):
 
 # Reset Password method
 @router.put("/reset-password", status_code=status.HTTP_200_OK)
-async def reset_password(email: str, new_password: str, db: Session = Depends(get_db)):
+async def reset_password(email: str, new_password: str, db: db_dependency):
     try:
         logger.debug(f"Resetting password for email: {email}.")
         user = db.query(UserDetails).filter(UserDetails.email == email).first()

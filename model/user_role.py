@@ -3,4 +3,4 @@ import enum
 
 class UserRole(enum.Enum):
     RECRUITER = 1
-    USER = 2
+    AR_REQUESTOR = 2
