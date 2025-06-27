@@ -2,6 +2,7 @@ langchain
 langchain-community
 langchain-openai
 langchain-core
+langgraph
 faiss-cpu
 fastapi
 uvicorn
@@ -13,7 +14,7 @@ langchain-huggingface
 pydantic
 python-dotenv
 itsdangerous
-pypdf
+PyPDF2
 sentence-transformers
 bcrypt==4.0.1
 pymysql
@@ -21,3 +22,4 @@ python-jose[cryptography]
 cryptography
 python-multipart
 alembic
+openai

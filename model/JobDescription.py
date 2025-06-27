@@ -8,7 +8,7 @@ class JobDescription(base):
     __tablename__ = 'job_descriptions'
     __allow_unmapped__ = True
 
-    id = Column(String(36), primary_key=True)  # UUID
+    id = Column(Integer, primary_key=True)  # UUID
     title = Column(String(255), nullable=False)
     department = Column(String(100))
     location = Column(String(100))

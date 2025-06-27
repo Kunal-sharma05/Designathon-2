@@ -11,7 +11,7 @@ class WorkflowStatus(base):
     __tablename__ = 'workflow_statuses'
     __allow_unmapped__ = True
 
-    id = Column(String(36), primary_key=True)  # UUID
+    id = Column(Integer, primary_key=True)  # UUID
     job_description_id = Column(ForeignKey("job_descriptions.id")) # foreign key to job_descriptions.id
     progress = Column(Enum(WorkflowProgressEnum), default=WorkflowProgressEnum.PENDING)
     started_at = Column(DateTime, default=datetime.now)

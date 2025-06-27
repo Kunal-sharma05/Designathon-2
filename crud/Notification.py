@@ -5,7 +5,6 @@ from model.Notification import Notification  # Assuming this is the ORM model
 from schema.Notification import NotificationSchema, NotificationStatusEnum
 
 
-
 def get_all_notifications(db: db_dependency) -> list[NotificationSchema]:
     try:
         logger.debug("Fetching all notifications from the database.")
@@ -21,7 +20,7 @@ def get_all_notifications(db: db_dependency) -> list[NotificationSchema]:
         )
 
 
-def get_notification_by_id(db: db_dependency, id: str) -> NotificationSchema:
+def get_notification_by_id(db: db_dependency, id: int) -> NotificationSchema:
     try:
         logger.debug(f"Fetching notification with ID: {id}.")
         result = db.query(Notification).filter(Notification.id == id).first()
@@ -44,7 +43,7 @@ def get_notification_by_id(db: db_dependency, id: str) -> NotificationSchema:
         )
 
 
-def get_notifications_by_job_description_id(db: db_dependency, job_description_id: str) -> list[NotificationSchema]:
+def get_notifications_by_job_description_id(db: db_dependency, job_description_id: int) -> list[NotificationSchema]:
     try:
         logger.debug(f"Fetching notifications for job description ID: {job_description_id}.")
         result = db.query(Notification).filter(Notification.job_description_id == job_description_id).all()
@@ -83,9 +82,10 @@ def add_notification(db: db_dependency, notification_request: NotificationSchema
         )
 
 
-def update_notification_status_by_id(db: db_dependency, id: str, status: NotificationStatusEnum) -> NotificationSchema:
+def update_notification_status_by_id(db: db_dependency, id: int,
+                                     status_notification: NotificationStatusEnum) -> NotificationSchema:
     try:
-        logger.debug(f"Attempting to update status of notification with ID: {id} to {status}.")
+        logger.debug(f"Attempting to update status of notification with ID: {id} to {status_notification}.")
         result = db.query(Notification).filter(Notification.id == id).first()
         if not result:
             logger.warning(f"Notification with ID {id} not found for status update.")
@@ -98,7 +98,7 @@ def update_notification_status_by_id(db: db_dependency, id: str, status: Notific
             result.sent_at = datetime.now()
         db.add(result)
         db.commit()
-        logger.info(f"Successfully updated status of notification with ID: {id} to {status}.")
+        logger.info(f"Successfully updated status of notification with ID: {id} to {status_notification}.")
         return NotificationSchema.model_validate(result)
     except HTTPException as http_exc:
         raise http_exc
@@ -110,7 +110,7 @@ def update_notification_status_by_id(db: db_dependency, id: str, status: Notific
         )
 
 
-def delete_notification_by_id(db: db_dependency, id: str) -> None:
+def delete_notification_by_id(db: db_dependency, id: int) -> None:
     try:
         logger.debug(f"Attempting to delete notification with ID: {id}.")
         result = db.query(Notification).filter(Notification.id == id).first()
@@ -133,23 +133,24 @@ def delete_notification_by_id(db: db_dependency, id: str) -> None:
         )
 
 
-def get_notifications_by_status(db: db_dependency, status: NotificationStatusEnum) -> list[NotificationSchema]:
+def get_notifications_by_status(db: db_dependency, status_notification: NotificationStatusEnum) -> list[
+    NotificationSchema]:
     try:
-        logger.debug(f"Fetching notifications with status: {status}.")
-        result = db.query(Notification).filter(Notification.status == status).all()
+        logger.debug(f"Fetching notifications with status: {status_notification}.")
+        result = db.query(Notification).filter(Notification.status == status_notification).all()
         if not result:
-            logger.warning(f"No notifications found with status: {status}.")
+            logger.warning(f"No notifications found with status: {status_notification}.")
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="No notifications found with the given status."
             )
         notifications = [NotificationSchema.model_validate(item) for item in result]
-        logger.info(f"Successfully fetched notifications with status: {status}.")
+        logger.info(f"Successfully fetched notifications with status: {status_notification}.")
         return notifications
     except HTTPException as http_exc:
         raise http_exc
     except Exception as e:
-        logger.error(f"Error occurred while fetching notifications with status {status}: {e}")
+        logger.error(f"Error occurred while fetching notifications with status {status_notification}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred while fetching notifications with the given status."

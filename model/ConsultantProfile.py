@@ -8,7 +8,7 @@ class ConsultantProfile(base):
     __tablename__ = 'consultant_profiles'
     __allow_unmapped__ = True
 
-    id = Column(String(36), primary_key=True)  # UUID
+    id = Column(Integer, primary_key=True)  # UUID
     name = Column(String(255), nullable=False)
     email = Column(String(255), unique=True, nullable=False)
     skills = Column(JSON)  # Stored as JSON array

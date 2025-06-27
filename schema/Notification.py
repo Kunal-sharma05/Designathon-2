@@ -5,7 +5,6 @@ from model.NotificationEnum import NotificationStatusEnum
 
 
 class NotificationSchema(BaseModel):
-    id: str = Field(..., description="UUID of the notification")
     job_description_id: str = Field(..., description="Foreign key to the job description ID")
     recipient_email: str = Field(
         ...,

@@ -20,7 +20,7 @@ def get_all_job_descriptions(db: db_dependency) -> list[JobDescriptionRequest]:
         )
 
 
-def get_job_description_by_id(db: db_dependency, id: str) -> JobDescriptionRequest:
+def get_job_description_by_id(db: db_dependency, id: int) -> JobDescriptionRequest:
     try:
         logger.debug(f"Fetching job description with ID: {id}.")
         result = db.query(JobDescription).filter(JobDescription.id == id).first()
@@ -82,7 +82,7 @@ def add_job_description(db: db_dependency, job_description_request: JobDescripti
         )
 
 
-def update_job_description_by_id(db: db_dependency, id: str, job_description_request: JobDescriptionRequest) -> JobDescriptionRequest:
+def update_job_description_by_id(db: db_dependency, id: int, job_description_request: JobDescriptionRequest) -> JobDescriptionRequest:
     try:
         logger.debug(f"Attempting to update job description with ID: {id}.")
         result = db.query(JobDescription).filter(JobDescription.id == id).first()
@@ -108,7 +108,7 @@ def update_job_description_by_id(db: db_dependency, id: str, job_description_req
         )
 
 
-def delete_job_description_by_id(db: db_dependency, id: str) -> None:
+def delete_job_description_by_id(db: db_dependency, id: int) -> None:
     try:
         logger.debug(f"Attempting to delete job description with ID: {id}.")
         result = db.query(JobDescription).filter(JobDescription.id == id).first()
@@ -131,7 +131,7 @@ def delete_job_description_by_id(db: db_dependency, id: str) -> None:
         )
 
 
-def update_job_description_status(db: db_dependency, id: str, status: str) -> JobDescriptionRequest:
+def update_job_description_status(db: db_dependency, id: int, status: str) -> JobDescriptionRequest:
     try:
         logger.debug(f"Attempting to update status of job description with ID: {id} to {status}.")
         result = db.query(JobDescription).filter(JobDescription.id == id).first()

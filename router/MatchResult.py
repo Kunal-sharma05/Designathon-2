@@ -10,13 +10,32 @@ router = APIRouter()
 
 
 # GET all match results
-@router.get("/", status_code=status.HTTP_200_OK)
-async def read_all_match_results(user: Annotated[dict, Depends(get_current_user)], db: db_dependency):
+@router.get("/all-matches/{job_description_id}", status_code=status.HTTP_200_OK)
+async def get_all_match_results(user: Annotated[dict, Depends(get_current_user)], job_description_id: int,
+                                db: db_dependency):
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not authorized")
     try:
         logger.debug("Fetching all match results.")
-        match_results = match_result_service.get_all_match_results(db)
+        match_results = match_result_service.get_all_match_results(db, job_description_id)
+        logger.info("Successfully fetched all match results.")
+        return match_results
+    except Exception as e:
+        logger.error(f"Error occurred while fetching match results: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while fetching match results."
+        )
+
+
+@router.get("/top-3-matches/{job_description_id}", status_code=status.HTTP_200_OK)
+async def top_3_match_results(user: Annotated[dict, Depends(get_current_user)], job_description_id: int,
+                              db: db_dependency):
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not authorized")
+    try:
+        logger.debug("Fetching all match results.")
+        match_results = match_result_service.get_all_match_results(db, job_description_id)
         logger.info("Successfully fetched all match results.")
         return match_results
     except Exception as e:
@@ -29,7 +48,8 @@ async def read_all_match_results(user: Annotated[dict, Depends(get_current_user)
 
 # GET match result by ID
 @router.get("/{match_result_id}", status_code=status.HTTP_200_OK)
-async def read_match_result_by_id(user: Annotated[dict, Depends(get_current_user)], db: db_dependency, match_result_id: str = Path(...)):
+async def read_match_result_by_id(user: Annotated[dict, Depends(get_current_user)], db: db_dependency,
+                                  match_result_id: int = Path(...)):
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not authorized")
     try:
@@ -49,7 +69,8 @@ async def read_match_result_by_id(user: Annotated[dict, Depends(get_current_user
 
 # GET match results by job description ID
 @router.get("/job/{job_description_id}", status_code=status.HTTP_200_OK)
-async def read_match_results_by_job_description_id(user: Annotated[dict, Depends(get_current_user)], db: db_dependency, job_description_id: str = Path(...)):
+async def read_match_results_by_job_description_id(user: Annotated[dict, Depends(get_current_user)], db: db_dependency,
+                                                   job_description_id: int = Path(...)):
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not authorized")
     try:
@@ -70,10 +91,10 @@ async def read_match_results_by_job_description_id(user: Annotated[dict, Depends
 # GET top N match results by job description ID
 @router.get("/job/{job_description_id}/top", status_code=status.HTTP_200_OK)
 async def read_top_match_results_by_job_description_id(
-    user: Annotated[dict, Depends(get_current_user)],
-    db: db_dependency,
-    job_description_id: str = Path(...),
-    top_n: int = Query(...)
+        user: Annotated[dict, Depends(get_current_user)],
+        db: db_dependency,
+        job_description_id: int = Path(...),
+        top_n: int = Query(...)
 ):
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not authorized")
@@ -85,7 +106,8 @@ async def read_top_match_results_by_job_description_id(
     except HTTPException as http_exc:
         raise http_exc
     except Exception as e:
-        logger.error(f"Error occurred while fetching top match results for job description ID {job_description_id}: {e}")
+        logger.error(
+            f"Error occurred while fetching top match results for job description ID {job_description_id}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred while fetching top match results for the job description ID."
@@ -94,7 +116,8 @@ async def read_top_match_results_by_job_description_id(
 
 # POST a new match result
 @router.post("/", status_code=status.HTTP_201_CREATED)
-async def create_match_result(user: Annotated[dict, Depends(get_current_user)], db: db_dependency, match_result_request: MatchResultSchema):
+async def create_match_result(user: Annotated[dict, Depends(get_current_user)], db: db_dependency,
+                              match_result_request: MatchResultSchema):
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not authorized")
     try:
@@ -113,10 +136,10 @@ async def create_match_result(user: Annotated[dict, Depends(get_current_user)], 
 # PUT to update match result by ID
 @router.put("/{match_result_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def update_match_result(
-    user: Annotated[dict, Depends(get_current_user)],
-    db: db_dependency,
-    match_result_request: MatchResultSchema,
-    match_result_id: str = Path(...)
+        user: Annotated[dict, Depends(get_current_user)],
+        db: db_dependency,
+        match_result_request: MatchResultSchema,
+        match_result_id: int = Path(...)
 ):
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not authorized")
@@ -136,7 +159,8 @@ async def update_match_result(
 
 # DELETE match result by ID
 @router.delete("/{match_result_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_match_result(db: db_dependency, user: Annotated[dict, Depends(get_current_user)], match_result_id: str = Path(...)):
+async def delete_match_result(db: db_dependency, user: Annotated[dict, Depends(get_current_user)],
+                              match_result_id: int = Path(...)):
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not authorized")
     try:

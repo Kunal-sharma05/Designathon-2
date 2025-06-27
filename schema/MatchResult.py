@@ -4,7 +4,6 @@ from datetime import datetime
 
 
 class MatchResultSchema(BaseModel):
-    id: str = Field(..., description="UUID of the match result")
     job_description_id: str = Field(..., description="Foreign key to the job description ID")
     consultant_id: str = Field(..., description="Foreign key to the consultant profile ID")
     similarity_score: Optional[float] = Field(
@@ -15,3 +14,7 @@ class MatchResultSchema(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class MatchResultSchemaCreate(MatchResultSchema):
+    pass

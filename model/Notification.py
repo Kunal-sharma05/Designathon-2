@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, DateTime, Enum, ForeignKey
+from sqlalchemy import Column, String, DateTime, Enum, ForeignKey, Integer
 from db.database import base
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -8,7 +8,7 @@ class Notification(base):
     __tablename__ = 'notifications'
     __allow_unmapped__ = True
 
-    id = Column(String(36), primary_key=True)  # UUID
+    id = Column(Integer, primary_key=True)  # UUID
     job_description_id = Column(ForeignKey("job_descriptions.id"))  # foreign key to job_descriptions.id
     workflow_status_id = Column(ForeignKey("workflow_statuses.id"))
     recipient_email = Column(String(255), nullable=False)

@@ -1,17 +1,60 @@
 from utility.logging_config import logger
 from fastapi import HTTPException, status
 from db.database import db_dependency
+from model.MatchResult import MatchResult as MatchResultModel
 from model.MatchResult import MatchResult  # Assuming this is the ORM model
 from schema.MatchResult import MatchResultSchema
+from model.JobDescription import JobDescription
+from model.ConsultantProfile import ConsultantProfile
+from utility.agentic_flow import run_agent_matching
 
 
-def get_all_match_results(db: db_dependency) -> list[MatchResultSchema]:
+def get_all_match_results(db: db_dependency, jobDescription_id: int):
     try:
         logger.debug("Fetching all match results from the database.")
-        result = db.query(MatchResult).all()
-        match_results = [MatchResultSchema.model_validate(item) for item in result]
+        jd = db.query(JobDescription).filter(JobDescription.id == jobDescription_id).first()
+        profiles = db.query(ConsultantProfile).all()
+        if not jd or not profiles:
+            print(f"Job Descriptions or Profiles not found for Job ID: {jobDescription_id}")
+        logger.debug("Invoking run_agent_matching function.")
+        result = run_agent_matching(db, jd, profiles)
+        all_matches = result.get("all_matches", [])
+
+        if not all_matches:
+            print(f"No matches found for job_id: {jobDescription_id}")
+
+        db.query(MatchResultModel).filter(MatchResultModel.job_description_id == jobDescription_id).delete()
+        db.commit()
+
+        for idx, match in enumerate(all_matches):
+            matched_profile = MatchResultModel(
+                rank=idx + 1,
+                job_description_id=jobDescription_id,
+                consultant_id=match["profile"].id,
+                similarity_score=match["similarity_score"]
+
+            )
+            db.add(matched_profile)
+        db.commit()
+        serialized_matches = [
+            {
+                "profile": {
+                    "id": match["profile"].id,
+                    "name": match["profile"].name,
+                    "skills": match["profile"].skills,
+                    "experience": match["profile"].experience,
+                    "location": match["profile"].location,
+                    "availability": match["profile"].availability,
+                },
+                "similarity_score": match["similarity_score"],
+                "rank": idx + 1,
+            }
+            for idx, match in enumerate(all_matches)
+        ]
+
         logger.info("Successfully fetched all match results.")
-        return match_results
+        return serialized_matches
+
     except Exception as e:
         logger.error(f"Error occurred while fetching match results: {e}")
         raise HTTPException(
@@ -20,7 +63,44 @@ def get_all_match_results(db: db_dependency) -> list[MatchResultSchema]:
         )
 
 
-def get_match_result_by_id(db: db_dependency, id: str) -> MatchResultSchema:
+def get_top_3_matches(db: db_dependency, jd_id: int):
+    """
+    Fetch the top 3 ranked profiles for a given Job Description ID.
+    """
+    # Query the RankedProfile table for the top 3 results
+    try:
+        logger.debug("Fetching top 3 results")
+        top_3_profiles = (
+            db.query(MatchResult)
+            .filter(MatchResult.job_description_id == jd_id)
+            .order_by(MatchResult.rank.asc())
+            .limit(3)
+            .all()
+        )
+
+        # Serialize the response
+        serialized_results = [
+            {
+                "profile_id": profile.consultant_id,
+                "rank": profile.rank,
+                "similarity_score": profile.similarity_score,
+                "ranked_at": profile.matched_at.isoformat() if profile.matched_at else None,
+            }
+            for profile in top_3_profiles
+        ]
+
+        return serialized_results
+    except HTTPException as http_exc:
+        raise http_exc
+    except Exception as e:
+        logger.error(f"Error occurred while fetching match result by ID {id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while fetching the match result."
+        )
+
+
+def get_match_result_by_id(db: db_dependency, id: int) -> MatchResultSchema:
     try:
         logger.debug(f"Fetching match result with ID: {id}.")
         result = db.query(MatchResult).filter(MatchResult.id == id).first()
@@ -43,7 +123,7 @@ def get_match_result_by_id(db: db_dependency, id: str) -> MatchResultSchema:
         )
 
 
-def get_match_results_by_job_description_id(db: db_dependency, job_description_id: str) -> list[MatchResultSchema]:
+def get_match_results_by_job_description_id(db: db_dependency, job_description_id: int) -> list[MatchResultSchema]:
     try:
         logger.debug(f"Fetching match results for job description ID: {job_description_id}.")
         result = db.query(MatchResult).filter(MatchResult.job_description_id == job_description_id).all()
@@ -82,7 +162,7 @@ def add_match_result(db: db_dependency, match_result_request: MatchResultSchema)
         )
 
 
-def update_match_result_by_id(db: db_dependency, id: str, match_result_request: MatchResultSchema) -> MatchResultSchema:
+def update_match_result_by_id(db: db_dependency, id: int, match_result_request: MatchResultSchema) -> MatchResultSchema:
     try:
         logger.debug(f"Attempting to update match result with ID: {id}.")
         result = db.query(MatchResult).filter(MatchResult.id == id).first()
@@ -108,7 +188,7 @@ def update_match_result_by_id(db: db_dependency, id: str, match_result_request: 
         )
 
 
-def delete_match_result_by_id(db: db_dependency, id: str) -> None:
+def delete_match_result_by_id(db: db_dependency, id: int) -> None:
     try:
         logger.debug(f"Attempting to delete match result with ID: {id}.")
         result = db.query(MatchResult).filter(MatchResult.id == id).first()
@@ -131,10 +211,12 @@ def delete_match_result_by_id(db: db_dependency, id: str) -> None:
         )
 
 
-def get_top_match_results_by_job_description_id(db: db_dependency, job_description_id: str, top_n: int) -> list[MatchResultSchema]:
+def get_top_match_results_by_job_description_id(db: db_dependency, job_description_id: int, top_n: int) -> list[
+    MatchResultSchema]:
     try:
         logger.debug(f"Fetching top {top_n} match results for job description ID: {job_description_id}.")
-        result = db.query(MatchResult).filter(MatchResult.job_description_id == job_description_id).order_by(MatchResult.rank.asc()).limit(top_n).all()
+        result = db.query(MatchResult).filter(MatchResult.job_description_id == job_description_id).order_by(
+            MatchResult.rank.asc()).limit(top_n).all()
         if not result:
             logger.warning(f"No match results found for job description ID: {job_description_id}.")
             raise HTTPException(
@@ -147,7 +229,8 @@ def get_top_match_results_by_job_description_id(db: db_dependency, job_descripti
     except HTTPException as http_exc:
         raise http_exc
     except Exception as e:
-        logger.error(f"Error occurred while fetching top match results for job description ID {job_description_id}: {e}")
+        logger.error(
+            f"Error occurred while fetching top match results for job description ID {job_description_id}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred while fetching top match results for the job description ID."

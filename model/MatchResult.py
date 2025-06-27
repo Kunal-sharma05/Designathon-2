@@ -7,7 +7,7 @@ class MatchResult(base):
     __tablename__ = 'matches'
     __allow_unmapped__ = True
 
-    id = Column(String(36), primary_key=True)  # UUID
+    id = Column(Integer, primary_key=True)  # UUID
     job_description_id = Column(ForeignKey("job_descriptions.id"))  # foreign key to job_descriptions.id
     consultant_id = Column(ForeignKey("consultant_profiles.id"))  # foreign key to consultant_profiles.id
     similarity_score = Column(Float)  # float between 0.0 - 1.0

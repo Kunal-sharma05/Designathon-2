@@ -28,7 +28,7 @@ async def read_all_notifications(user: Annotated[dict, Depends(get_current_user)
 
 # GET notification by ID
 @router.get("/{notification_id}", status_code=status.HTTP_200_OK)
-async def read_notification_by_id(user: Annotated[dict, Depends(get_current_user)], db: db_dependency, notification_id: str = Path(...)):
+async def read_notification_by_id(user: Annotated[dict, Depends(get_current_user)], db: db_dependency, notification_id: int = Path(...)):
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not authorized")
     try:
@@ -48,7 +48,7 @@ async def read_notification_by_id(user: Annotated[dict, Depends(get_current_user
 
 # GET notifications by job description ID
 @router.get("/job/{job_description_id}", status_code=status.HTTP_200_OK)
-async def read_notifications_by_job_description_id(user: Annotated[dict, Depends(get_current_user)], db: db_dependency, job_description_id: str = Path(...)):
+async def read_notifications_by_job_description_id(user: Annotated[dict, Depends(get_current_user)], db: db_dependency, job_description_id: int = Path(...)):
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not authorized")
     try:
@@ -68,18 +68,18 @@ async def read_notifications_by_job_description_id(user: Annotated[dict, Depends
 
 # GET notifications by status
 @router.get("/status/{status}", status_code=status.HTTP_200_OK)
-async def read_notifications_by_status(user: Annotated[dict, Depends(get_current_user)], db: db_dependency, status: NotificationStatusEnum = Path(...)):
+async def read_notifications_by_status(user: Annotated[dict, Depends(get_current_user)], db: db_dependency, status_notification: NotificationStatusEnum = Path(...)):
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not authorized")
     try:
-        logger.debug(f"Fetching notifications with status: {status}.")
-        notifications = notification_service.get_notifications_by_status(db, status)
-        logger.info(f"Successfully fetched notifications with status: {status}.")
+        logger.debug(f"Fetching notifications with status: {status_notification}.")
+        notifications = notification_service.get_notifications_by_status(db, status_notification)
+        logger.info(f"Successfully fetched notifications with status: {status_notification}.")
         return notifications
     except HTTPException as http_exc:
         raise http_exc
     except Exception as e:
-        logger.error(f"Error occurred while fetching notifications with status {status}: {e}")
+        logger.error(f"Error occurred while fetching notifications with status {status_notification}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred while fetching notifications with the given status."
@@ -109,15 +109,15 @@ async def create_notification(user: Annotated[dict, Depends(get_current_user)], 
 async def update_notification_status(
     user: Annotated[dict, Depends(get_current_user)],
     db: db_dependency,
-    notification_id: str = Path(...),
-    status: NotificationStatusEnum = Query(...)
+    notification_id: int = Path(...),
+    status_notification: NotificationStatusEnum = Query(...)
 ):
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not authorized")
     try:
-        logger.debug(f"Updating status of notification with ID: {notification_id} to {status}.")
-        notification = notification_service.update_notification_status_by_id(db, notification_id, status)
-        logger.info(f"Successfully updated status of notification with ID: {notification_id} to {status}.")
+        logger.debug(f"Updating status of notification with ID: {notification_id} to {status_notification}.")
+        notification = notification_service.update_notification_status_by_id(db, notification_id, status_notification)
+        logger.info(f"Successfully updated status of notification with ID: {notification_id} to {status_notifications}.")
         return notification
     except HTTPException as http_exc:
         raise http_exc
@@ -131,7 +131,7 @@ async def update_notification_status(
 
 # DELETE notification by ID
 @router.delete("/{notification_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_notification(user: Annotated[dict, Depends(get_current_user)],db: db_dependency, notification_id: str = Path(...)):
+async def delete_notification(user: Annotated[dict, Depends(get_current_user)],db: db_dependency, notification_id: int = Path(...)):
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not authorized")
     try:

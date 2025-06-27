@@ -20,7 +20,7 @@ def get_all_consultant_profiles(db: db_dependency) -> list[ConsultantProfileSche
         )
 
 
-def get_consultant_profile_by_id(db: db_dependency, id: str) -> ConsultantProfileSchema:
+def get_consultant_profile_by_id(db: db_dependency, id: int) -> ConsultantProfileSchema:
     try:
         logger.debug(f"Fetching consultant profile with ID: {id}.")
         result = db.query(ConsultantProfile).filter(ConsultantProfile.id == id).first()
@@ -82,7 +82,7 @@ def add_consultant_profile(db: db_dependency, consultant_profile_request: Consul
         )
 
 
-def update_consultant_profile_by_id(db: db_dependency, id: str, consultant_profile_request: ConsultantProfileSchema) -> ConsultantProfileSchema:
+def update_consultant_profile_by_id(db: db_dependency, id: int, consultant_profile_request: ConsultantProfileSchema) -> ConsultantProfileSchema:
     try:
         logger.debug(f"Attempting to update consultant profile with ID: {id}.")
         result = db.query(ConsultantProfile).filter(ConsultantProfile.id == id).first()
@@ -108,7 +108,7 @@ def update_consultant_profile_by_id(db: db_dependency, id: str, consultant_profi
         )
 
 
-def delete_consultant_profile_by_id(db: db_dependency, id: str) -> None:
+def delete_consultant_profile_by_id(db: db_dependency, id: int) -> None:
     try:
         logger.debug(f"Attempting to delete consultant profile with ID: {id}.")
         result = db.query(ConsultantProfile).filter(ConsultantProfile.id == id).first()
@@ -131,7 +131,7 @@ def delete_consultant_profile_by_id(db: db_dependency, id: str) -> None:
         )
 
 
-def update_consultant_availability(db: db_dependency, id: str, availability: str) -> ConsultantProfileSchema:
+def update_consultant_availability(db: db_dependency, id: int, availability: str) -> ConsultantProfileSchema:
     try:
         logger.debug(f"Attempting to update availability of consultant profile with ID: {id} to {availability}.")
         result = db.query(ConsultantProfile).filter(ConsultantProfile.id == id).first()

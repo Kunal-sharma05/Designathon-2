@@ -9,7 +9,7 @@ class UserDetails(base):
     __tablename__ = "user_details"
     __allow_unmapped__ = True
 
-    id = Column(String(50), primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True)
     name = Column(VARCHAR(250))
     email = Column(VARCHAR(250), unique=True)
     password = Column(VARCHAR(250))

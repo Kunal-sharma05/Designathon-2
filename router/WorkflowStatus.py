@@ -29,7 +29,7 @@ async def read_all_workflow_statuses(user: Annotated[dict, Depends(get_current_u
 
 # GET workflow status by ID
 @router.get("/{workflow_status_id}", status_code=status.HTTP_200_OK)
-async def read_workflow_status_by_id(user: Annotated[dict, Depends(get_current_user)], db: db_dependency, workflow_status_id: str = Path(...)):
+async def read_workflow_status_by_id(user: Annotated[dict, Depends(get_current_user)], db: db_dependency, workflow_status_id: int = Path(...)):
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not authorized")
     try:
@@ -71,7 +71,7 @@ async def update_workflow_status(
     user: Annotated[dict, Depends(get_current_user)],
     db: db_dependency,
     workflow_status_request: WorkflowStatusSchema,
-    workflow_status_id: str = Path(...),
+    workflow_status_id: int = Path(...),
 ):
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not authorized")
@@ -91,7 +91,7 @@ async def update_workflow_status(
 
 # DELETE workflow status by ID
 @router.delete("/{workflow_status_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_workflow_status(user: Annotated[dict, Depends(get_current_user)], db: db_dependency, workflow_status_id: str = Path(...)):
+async def delete_workflow_status(user: Annotated[dict, Depends(get_current_user)], db: db_dependency, workflow_status_id: int = Path(...)):
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not authorized")
     try:
@@ -114,7 +114,7 @@ async def update_workflow_progress(
     user: Annotated[dict, Depends(get_current_user)],
     db: db_dependency,
     steps: dict,
-    workflow_status_id: str = Path(...),
+    workflow_status_id: int = Path(...),
     progress: str = Query(..., regex="^(PENDING|PROCESSING|COMPLETED)$"),
 ):
     if user is None:

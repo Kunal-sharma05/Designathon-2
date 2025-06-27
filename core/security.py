@@ -11,6 +11,7 @@ from jose import jwt, JWTError
 from fastapi.security import OAuth2PasswordBearer
 from datetime import timedelta, timezone, datetime
 from dotenv import load_dotenv
+from db.database import db_dependency
 
 load_dotenv()
 
@@ -36,8 +37,10 @@ def hashing_password(password: str):
     return password
 
 
-async def create_access_token(email: str, user_id: int, expires_delta: timedelta):
-    encode = {'sub': email, 'id': user_id}
+async def create_access_token(email: str, user_id: int, expires_delta: timedelta, db: db_dependency):
+    from crud.user import get_user_by_id
+    user = get_user_by_id(user_id,db)
+    encode = {'sub': email, 'id': user_id, 'role': user.role.value}
     expires = datetime.now(timezone.utc) + expires_delta
     encode.update({'exp': expires})
     return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)

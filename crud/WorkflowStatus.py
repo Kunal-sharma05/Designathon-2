@@ -21,7 +21,7 @@ def get_all_workflow_statuses(db: db_dependency) -> list[WorkflowStatusSchema]:
         )
 
 
-def get_workflow_status_by_id(db: db_dependency, id: str) -> WorkflowStatusSchema:
+def get_workflow_status_by_id(db: db_dependency, id: int) -> WorkflowStatusSchema:
     try:
         logger.debug(f"Fetching workflow status with ID: {id}.")
         result = db.query(WorkflowStatus).filter(WorkflowStatus.id == id).first()
@@ -60,7 +60,7 @@ def add_workflow_status(db: db_dependency, workflow_status_request: WorkflowStat
         )
 
 
-def update_workflow_status_by_id(db: db_dependency, id: str, workflow_status_request: WorkflowStatusSchema) -> WorkflowStatusSchema:
+def update_workflow_status_by_id(db: db_dependency, id: int, workflow_status_request: WorkflowStatusSchema) -> WorkflowStatusSchema:
     try:
         logger.debug(f"Attempting to update workflow status with ID: {id}.")
         result = db.query(WorkflowStatus).filter(WorkflowStatus.id == id).first()
@@ -86,7 +86,7 @@ def update_workflow_status_by_id(db: db_dependency, id: str, workflow_status_req
         )
 
 
-def delete_workflow_status_by_id(db: db_dependency, id: str) -> None:
+def delete_workflow_status_by_id(db: db_dependency, id: int) -> None:
     try:
         logger.debug(f"Attempting to delete workflow status with ID: {id}.")
         result = db.query(WorkflowStatus).filter(WorkflowStatus.id == id).first()
@@ -109,7 +109,7 @@ def delete_workflow_status_by_id(db: db_dependency, id: str) -> None:
         )
 
 
-def update_workflow_progress(db: db_dependency, id: str, progress: str, steps: dict) -> WorkflowStatusSchema:
+def update_workflow_progress(db: db_dependency, id: int, progress: str, steps: dict) -> WorkflowStatusSchema:
     try:
         logger.debug(f"Attempting to update progress of workflow status with ID: {id} to {progress}.")
         result = db.query(WorkflowStatus).filter(WorkflowStatus.id == id).first()
@@ -122,7 +122,7 @@ def update_workflow_progress(db: db_dependency, id: str, progress: str, steps: d
         result.progress = progress
         result.steps = steps
         if progress == "COMPLETED":
-            result.completed_at = datetime.utcnow()
+            result.completed_at = datetime.now()
         db.add(result)
         db.commit()
         logger.info(f"Successfully updated progress of workflow status with ID: {id} to {progress}.")

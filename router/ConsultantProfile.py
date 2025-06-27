@@ -1,10 +1,12 @@
-from fastapi import APIRouter, Depends, status, HTTPException, Query, Path
+from fastapi import APIRouter, Depends, status, HTTPException, Query, Path, UploadFile, File
 from crud import ConsultantProfile as consultant_profile_service
 from db.database import db_dependency
 from schema.ConsultantProfile import ConsultantProfileSchema
 from utility.logging_config import logger
 from core.security import get_current_user
 from typing import Annotated
+from PyPDF2 import PdfReader
+from utility.file_reader_using_genai import extract_information
 
 router = APIRouter()
 
@@ -28,7 +30,7 @@ async def read_all_consultant_profiles(user: Annotated[dict, Depends(get_current
 
 # GET consultant profile by ID
 @router.get("/{consultant_profile_id}", status_code=status.HTTP_200_OK)
-async def read_consultant_profile_by_id(user: Annotated[dict, Depends(get_current_user)], db: db_dependency, consultant_profile_id: str = Path(...)):
+async def read_consultant_profile_by_id(user: Annotated[dict, Depends(get_current_user)], db: db_dependency, consultant_profile_id: int = Path(...)):
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not authorized")
     try:
@@ -83,6 +85,48 @@ async def create_consultant_profile(user: Annotated[dict, Depends(get_current_us
             detail="An error occurred while creating the consultant profile."
         )
 
+@router.post("/upload-pdfs/", status_code=status.HTTP_200_OK)
+async def upload_multiple_pdfs(db: db_dependency,files: list[UploadFile] = File(...)):
+    """
+    Endpoint to upload multiple PDF files and process their content.
+    """
+    processed_results = []
+
+    if not files:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No files provided for upload."
+        )
+
+    try:
+        logger.debug("Creating multiple new consultant profile.")
+        for file in files:
+            if file.content_type != "application/pdf":
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"File {file.filename} is not a valid PDF."
+                )
+
+            logger.debug(f"Reading file: {file.filename}")
+            pdf_reader = PdfReader(file.file)
+            pdf_content = ""
+
+            for page in pdf_reader.pages:
+                pdf_content += page.extract_text()
+
+            logger.info(f"Extracted content from {file.filename}")
+            processed_result = extract_information(pdf_content)
+            consultant_profile_service.add_consultant_profile(db,processed_result)
+            processed_results.append({file.filename: processed_result})
+
+        return {"message": "PDF files processed successfully.", "results": processed_results}
+
+    except Exception as e:
+        logger.error(f"An error occurred while processing PDF files: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while processing the PDF files."
+        )
 
 # PUT to update consultant profile by ID
 @router.put("/{consultant_profile_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -90,7 +134,7 @@ async def update_consultant_profile(
     user: Annotated[dict, Depends(get_current_user)],
     db: db_dependency,
     consultant_profile_request: ConsultantProfileSchema,
-    consultant_profile_id: str = Path(...),
+    consultant_profile_id: int = Path(...),
 ):
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not authorized")
@@ -110,7 +154,7 @@ async def update_consultant_profile(
 
 # DELETE consultant profile by ID
 @router.delete("/{consultant_profile_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_consultant_profile(user: Annotated[dict, Depends(get_current_user)], db: db_dependency, consultant_profile_id: str = Path(...)):
+async def delete_consultant_profile(user: Annotated[dict, Depends(get_current_user)], db: db_dependency, consultant_profile_id: int = Path(...)):
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not authorized")
     try:
@@ -132,7 +176,7 @@ async def delete_consultant_profile(user: Annotated[dict, Depends(get_current_us
 async def update_consultant_availability(
     user: Annotated[dict, Depends(get_current_user)],
     db: db_dependency,
-    consultant_profile_id: str = Path(...),
+    consultant_profile_id: int = Path(...),
     availability: str = Query(...),
 ):
     if user is None:

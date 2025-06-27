@@ -51,7 +51,7 @@ async def read_job_descriptions_by_title(user: Annotated[dict, Depends(get_curre
 # GET job description by ID
 @router.get("/{job_description_id}", status_code=status.HTTP_200_OK)
 async def read_job_description_by_id(user: Annotated[dict, Depends(get_current_user)], db: db_dependency,
-                                     job_description_id: str = Path(...)):
+                                     job_description_id: int = Path(...)):
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not authorized")
     try:
@@ -94,7 +94,7 @@ async def update_job_description(
         user: Annotated[dict, Depends(get_current_user)],
         db: db_dependency,
         job_description_request: JobDescriptionRequest,
-        job_description_id: str = Path(...)
+        job_description_id: int = Path()
 ):
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not authorized")
@@ -115,7 +115,7 @@ async def update_job_description(
 # DELETE job description by ID
 @router.delete("/{job_description_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_job_description(user: Annotated[dict, Depends(get_current_user)], db: db_dependency,
-                                 job_description_id: str = Path(...)):
+                                 job_description_id: int = Path()):
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not authorized")
     try:
@@ -137,7 +137,7 @@ async def delete_job_description(user: Annotated[dict, Depends(get_current_user)
 async def update_job_description_status(
         user: Annotated[dict, Depends(get_current_user)],
         db: db_dependency,
-        job_description_id: str = Path(...),
+        job_description_id: int = Path(...),
         status: str = Query(...),
 ):
     if user is None:

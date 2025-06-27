@@ -64,7 +64,7 @@ async def update_user_details(db: db_dependency, user_details_request: UserDetai
 
 # DELETE method
 @router.delete("/user_details/delete", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_user_details(db: db_dependency, user_id: int = Query(gt=0)):
+async def delete_user_details(db: db_dependency, user_id: str = Query()):
     try:
         logger.debug(f"Deleting user with ID: {user_id}.")
         user_details_model = user_service.get_user_by_id(user_id, db)
@@ -93,7 +93,7 @@ async def login_form(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
         if not user:
             logger.warning(f"Authentication failed for username: {form_data.username}.")
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not authorized")
-        token = await security.create_access_token(user.email, user.id, timedelta(minutes=20))
+        token = await security.create_access_token(user.email, user.id, timedelta(minutes=20), db)
         logger.info(f"Successfully authenticated user: {form_data.username}.")
         return {'access_token': token, 'token_type': 'bearer'}
     except HTTPException as http_exc:
