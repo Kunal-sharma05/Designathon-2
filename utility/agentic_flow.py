@@ -47,7 +47,7 @@ def compare_profiles(state: MatchState) -> MatchState:
     try:
         # Concatenate JD fields into a single string
         jd = state["job_description"]
-        jd_text = f"{jd.title} {jd.department or ''} {jd.location or ''} {jd.experience or ''} " \
+        jd_text = f"{jd.title} {jd.department or ''} {jd.location or ''} {jd.experience or ''} {jd.description or ''} " \
                   f"{', '.join(jd.skills) if jd.skills else ''}"
         state["jd_text"] = jd_text
         jd_embedding = get_embedding(jd_text)
@@ -56,7 +56,7 @@ def compare_profiles(state: MatchState) -> MatchState:
         profile_embeddings = []
         for profile in state["consultant_profiles"]:
             profile_text = f"{profile.name} {', '.join(profile.skills) if profile.skills else ''} " \
-                           f"{profile.experience or ''} {profile.location or ''} {profile.availability or ''}"
+                           f"{profile.experience or ''} {profile.location or ''}{profile.project or ''} {profile.availability or ''}"
             profile_embeddings.append(get_embedding(profile_text))
             print(profile_embeddings[-1])  # Debug: Print the last profile embedding
         state["profile_embeddings"] = profile_embeddings

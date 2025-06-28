@@ -2,6 +2,8 @@ from pydantic import BaseModel, Field
 from typing import Optional, Dict
 from datetime import datetime
 from model.WorkflowEnum import WorkflowProgressEnum
+import logging
+logger = logging.getLogger(__name__)
 
 
 class WorkflowStatusSchema(BaseModel):

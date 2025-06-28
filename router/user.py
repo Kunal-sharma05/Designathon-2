@@ -9,7 +9,8 @@ from fastapi.security import OAuth2PasswordRequestForm
 from schema.token import Token
 from schema.user import UserDetailsRequest
 from model.user import UserDetails
-from utility.logging_config import logger
+import logging
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 

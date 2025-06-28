@@ -1,6 +1,8 @@
 from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
+import logging
+logger = logging.getLogger(__name__)
 
 
 class MatchResultSchema(BaseModel):

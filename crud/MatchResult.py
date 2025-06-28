@@ -1,4 +1,3 @@
-from utility.logging_config import logger
 from fastapi import HTTPException, status
 from db.database import db_dependency
 from model.MatchResult import MatchResult as MatchResultModel
@@ -7,6 +6,8 @@ from schema.MatchResult import MatchResultSchema
 from model.JobDescription import JobDescription
 from model.ConsultantProfile import ConsultantProfile
 from utility.agentic_flow import run_agent_matching
+import logging
+logger = logging.getLogger(__name__)
 
 
 def get_all_match_results(db: db_dependency, jobDescription_id: int):

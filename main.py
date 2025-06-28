@@ -1,8 +1,7 @@
 from fastapi import FastAPI
 from db.database import engine
 from db.database import base
-from fastapi.middleware.cors import CORSMiddleware
-from utility.logging_config import logger  # Import the logger from your logging configuration file
+from fastapi.middleware.cors import CORSMiddleware  # Import the logger from your logging configuration file
 
 # Import all routers
 from router.user import router as user_router
@@ -11,6 +10,8 @@ from router.Notification import router as notification_router
 from router.ConsultantProfile import router as consultant_profile_router
 from router.WorkflowStatus import router as workflow_status_router
 from router.MatchResult import router as match_result_router
+import logging
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 

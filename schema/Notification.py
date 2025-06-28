@@ -2,6 +2,8 @@ from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
 from model.NotificationEnum import NotificationStatusEnum
+import logging
+logger = logging.getLogger(__name__)
 
 
 class NotificationSchema(BaseModel):

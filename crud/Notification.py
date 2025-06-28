@@ -1,8 +1,9 @@
-from utility.logging_config import logger
 from fastapi import HTTPException, status
 from db.database import db_dependency
 from model.Notification import Notification  # Assuming this is the ORM model
 from schema.Notification import NotificationSchema, NotificationStatusEnum
+import logging
+logger = logging.getLogger(__name__)
 
 
 def get_all_notifications(db: db_dependency) -> list[NotificationSchema]:

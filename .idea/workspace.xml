@@ -5,17 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="72ad22ff-a087-495b-b326-f10a210aebb5" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/utility/jobdescription_reader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/crud/JobDescription.py" beforeDir="false" afterPath="$PROJECT_DIR$/crud/JobDescription.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/ConsultantProfile.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/ConsultantProfile.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/JobDescription.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/JobDescription.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/router/JobDescription.py" beforeDir="false" afterPath="$PROJECT_DIR$/router/JobDescription.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/schema/ConsultantProfile.py" beforeDir="false" afterPath="$PROJECT_DIR$/schema/ConsultantProfile.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/schema/JobDescription.py" beforeDir="false" afterPath="$PROJECT_DIR$/schema/JobDescription.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/schema/Notification.py" beforeDir="false" afterPath="$PROJECT_DIR$/schema/Notification.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/router/ConsultantProfile.py" beforeDir="false" afterPath="$PROJECT_DIR$/router/ConsultantProfile.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utility/agentic_flow.py" beforeDir="false" afterPath="$PROJECT_DIR$/utility/agentic_flow.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utility/file_reader_using_genai.py" beforeDir="false" afterPath="$PROJECT_DIR$/utility/file_reader_using_genai.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

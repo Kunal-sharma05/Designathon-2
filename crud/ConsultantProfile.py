@@ -1,8 +1,9 @@
-from utility.logging_config import logger
 from fastapi import HTTPException, status
 from db.database import db_dependency
 from model.ConsultantProfile import ConsultantProfile  # Assuming this is the ORM model
 from schema.ConsultantProfile import ConsultantProfileSchema
+import logging
+logger = logging.getLogger(__name__)
 
 
 def get_all_consultant_profiles(db: db_dependency) -> list[ConsultantProfileSchema]:

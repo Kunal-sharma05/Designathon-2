@@ -5,7 +5,8 @@ from db.database import get_db
 from model.user import UserDetails
 from schema.user import UserDetailsRequest
 from core import security
-from utility.logging_config import logger
+import logging
+logger = logging.getLogger(__name__)
 
 db_dependency = Annotated[Session, Depends(get_db)]
 

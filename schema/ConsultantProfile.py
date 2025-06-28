@@ -2,6 +2,8 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import datetime
 from model.ConsultantEnum import ConsultantEnum
+import logging
+logger = logging.getLogger(__name__)
 
 
 class ConsultantProfileSchema(BaseModel):

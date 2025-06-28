@@ -142,9 +142,9 @@ def delete_job_description_by_id(db: db_dependency, id: int) -> None:
         )
 
 
-def update_job_description_status(db: db_dependency, id: int, status: str) -> JobDescriptionRequest:
+def update_job_description_status(db: db_dependency, id: int, notification_status: str) -> JobDescriptionRequest:
     try:
-        logger.debug(f"Attempting to update status of job description with ID: {id} to {status}.")
+        logger.debug(f"Attempting to update status of job description with ID: {id} to {notification_status}.")
         result = db.query(JobDescription).filter(JobDescription.id == id).first()
         if not result:
             logger.warning(f"Job description with ID {id} not found for status update.")
@@ -152,10 +152,10 @@ def update_job_description_status(db: db_dependency, id: int, status: str) -> Jo
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Job description not found."
             )
-        result.status = status
+        result.status = notification_status
         db.add(result)
         db.commit()
-        logger.info(f"Successfully updated status of job description with ID: {id} to {status}.")
+        logger.info(f"Successfully updated status of job description with ID: {id} to {notification_status}.")
         return JobDescriptionRequest.model_validate(result)
     except HTTPException as http_exc:
         raise http_exc

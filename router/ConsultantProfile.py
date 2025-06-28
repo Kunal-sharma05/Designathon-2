@@ -2,11 +2,12 @@ from fastapi import APIRouter, Depends, status, HTTPException, Query, Path, Uplo
 from crud import ConsultantProfile as consultant_profile_service
 from db.database import db_dependency
 from schema.ConsultantProfile import ConsultantProfileSchema
-from utility.logging_config import logger
 from core.security import get_current_user
 from typing import Annotated
 from PyPDF2 import PdfReader
 from utility.file_reader_using_genai import extract_information
+import logging
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 

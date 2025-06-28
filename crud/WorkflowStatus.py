@@ -1,9 +1,10 @@
-from utility.logging_config import logger
 from fastapi import HTTPException, status
 from db.database import db_dependency
 from model.WorkflowStatus import WorkflowStatus  # Assuming this is the ORM model
 from schema.WorkflowStatus import WorkflowStatusSchema  # Assuming a Pydantic schema exists
-from datetime import  datetime
+from datetime import datetime
+import logging
+logger = logging.getLogger(__name__)
 
 
 def get_all_workflow_statuses(db: db_dependency) -> list[WorkflowStatusSchema]:

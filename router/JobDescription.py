@@ -2,11 +2,12 @@ from fastapi import APIRouter, Depends, status, HTTPException, Query, Path, Uplo
 from crud import JobDescription as job_description_service
 from db.database import db_dependency
 from schema.JobDescription import JobDescriptionRequest
-from utility.logging_config import logger
 from core.security import get_current_user
 from typing import Annotated
 from PyPDF2 import PdfReader
 from utility.jobdescription_reader import extract_information
+import logging
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 

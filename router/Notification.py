@@ -2,9 +2,10 @@ from fastapi import APIRouter, Depends, status, HTTPException, Query, Path
 from crud import Notification as notification_service
 from db.database import db_dependency
 from schema.Notification import NotificationSchema, NotificationStatusEnum
-from utility.logging_config import logger
 from core.security import get_current_user
 from typing import Annotated
+import logging
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
