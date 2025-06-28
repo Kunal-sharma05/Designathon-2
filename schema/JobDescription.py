@@ -9,11 +9,10 @@ class JobDescriptionRequest(BaseModel):
     department: Optional[str] = Field(None, max_length=100, description="Department name")
     location: Optional[str] = Field(None, max_length=100, description="Location of the job")
     experience: Optional[str] = Field(None, max_length=100, description="Experience required for the job")
+    description: Optional[str] = Field(None, max_length=100, description="small descripton aboout the job job")
     skills: List[str] = Field(..., description="Skills required for the job stored as a JSON array")
-    requestor_email: Optional[str]
     status: JobDescriptionEnum = Field(default=JobDescriptionEnum.pending, description="Status of the job description")
     created_at: datetime = Field(default_factory=datetime.now, description="Creation timestamp")
-    user_id: int = Field(None, description="Foreign key to the user details table")
 
     class Config:
         from_attributes = True

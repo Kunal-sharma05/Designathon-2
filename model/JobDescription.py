@@ -13,6 +13,7 @@ class JobDescription(base):
     department = Column(String(100))
     location = Column(String(100))
     experience = Column(String(100))
+    description = Column(String(1000))
     skills = Column(JSON)  # Stored as JSON array
     requestor_email = Column(String(255))
     status = Column(Enum(JobDescriptionEnum), default=JobDescriptionEnum.pending)

@@ -1,27 +1,13 @@
 import os
-import uuid
-from datetime import datetime
-from enum import Enum
 from typing import List, Optional
 from schema.ConsultantProfile import ConsultantProfileSchema
-
 from dotenv import load_dotenv
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.prompts import ChatPromptTemplate
-from pydantic import BaseModel, Field
 from langchain_openai import AzureChatOpenAI
+from schema.JobDescription import JobDescriptionRequest
 
 load_dotenv()
-
-
-# Pydantic model for the information to be extracted by the LLM
-class ExtractedInfo(BaseModel):
-    name: str = Field(description="Name of the consultant")
-    email: str = Field(description="Email of the consultant")
-    skills: List[str] = Field(description="List of skills of the consultant")
-    experience: Optional[int] = Field(description="Total years of work experience of the consultant as an integer")
-    location: Optional[str] = Field(description="Location of the consultant")
-    project: Optional[str] = Field(description= "Past project details")
 
 
 # Initialize the LLM
@@ -34,7 +20,7 @@ llm = AzureChatOpenAI(
 )
 
 
-def extract_information(cleaned_text: str) -> ConsultantProfileSchema:
+def extract_information(cleaned_text: str) -> JobDescriptionRequest:
     """
     Extracts information from cleaned resume text using an LLM.
 
@@ -44,7 +30,7 @@ def extract_information(cleaned_text: str) -> ConsultantProfileSchema:
     Returns:
         A dictionary with the extracted and structured consultant profile.
     """
-    parser = JsonOutputParser(pydantic_object=ExtractedInfo)
+    parser = JsonOutputParser(pydantic_object=JobDescriptionRequest)
 
     format_instructions = parser.get_format_instructions()
 
@@ -66,9 +52,9 @@ Resume:
     extracted_data = chain.invoke({"cleaned_text": cleaned_text})
 
     # Create the full consultant profile with the extracted data
-    consultant_profile = ConsultantProfileSchema(**extracted_data)
+    job_description = JobDescriptionRequest(**extracted_data)
 
-    return consultant_profile
+    return job_description
 
 
 if __name__ == "__main__":

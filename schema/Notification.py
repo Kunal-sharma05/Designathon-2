@@ -9,7 +9,6 @@ class NotificationSchema(BaseModel):
     recipient_email: str = Field(
         ...,
         min_length=10,
-        pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$",
         description="""The email starts with alphanumeric characters, dots, underscores, percent signs, plus signs, or hyphens.
                        It contains an "@" symbol followed by a domain name.
                        The domain name is followed by a dot and a top-level domain (TLD) with at least two characters."""

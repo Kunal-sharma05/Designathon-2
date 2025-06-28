@@ -66,10 +66,20 @@ def get_job_description_by_title(db: db_dependency, title: str) -> list[JobDescr
         )
 
 
-def add_job_description(db: db_dependency, job_description_request: JobDescriptionRequest) -> JobDescriptionRequest:
+def add_job_description(db: db_dependency, job_description_request: JobDescriptionRequest, id: int,
+                        email: str) -> JobDescriptionRequest:
     try:
         logger.debug("Attempting to add a new job description.")
-        new_job_description = JobDescription(**job_description_request.model_dump())
+        new_job_description = JobDescription(
+            title=job_description_request.title,
+            department=job_description_request.department,
+            location=job_description_request.location,
+            experience=job_description_request.experience,
+            description=job_description_request.description,
+            skills=job_description_request.skills,  # Stored as JSON array
+            requestor_email=email,
+            user_id=id, )
+
         db.add(new_job_description)
         db.commit()
         logger.info("Successfully added a new job description.")
@@ -82,7 +92,8 @@ def add_job_description(db: db_dependency, job_description_request: JobDescripti
         )
 
 
-def update_job_description_by_id(db: db_dependency, id: int, job_description_request: JobDescriptionRequest) -> JobDescriptionRequest:
+def update_job_description_by_id(db: db_dependency, id: int,
+                                 job_description_request: JobDescriptionRequest) -> JobDescriptionRequest:
     try:
         logger.debug(f"Attempting to update job description with ID: {id}.")
         result = db.query(JobDescription).filter(JobDescription.id == id).first()

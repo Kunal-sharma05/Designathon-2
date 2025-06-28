@@ -14,5 +14,6 @@ class ConsultantProfile(base):
     skills = Column(JSON)  # Stored as JSON array
     experience = Column(Integer)  # in years
     location = Column(String(100))
+    project = Column(String(1000))
     availability = Column(Enum(ConsultantEnum), default=ConsultantEnum.available)
     created_at = Column(DateTime, default=datetime.now)

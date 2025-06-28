@@ -10,6 +10,9 @@ class ConsultantProfileSchema(BaseModel):
     skills: List[str] = Field(..., description="Skills of the consultant stored as a JSON array")
     experience: Optional[int] = Field(None, ge=0, description="Years of experience of the consultant")
     location: Optional[str] = Field(None, max_length=100, description="Location of the consultant")
-    availability: ConsultantEnum = Field(default=ConsultantEnum.available, description="Availability status of the consultant")
+    project: Optional[str] = Field(None, min_length=10, description="Past Project details")
+    availability: ConsultantEnum = Field(default=ConsultantEnum.available,
+                                         description="Availability status of the consultant")
+
     class Config:
         from_attributes = True

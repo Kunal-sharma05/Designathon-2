@@ -5,37 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="72ad22ff-a087-495b-b326-f10a210aebb5" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/utility/agentic_flow.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/utility/embeddings.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/utility/file_reader_using_genai.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utility/jobdescription_reader.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/security.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/security.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/crud/ConsultantProfile.py" beforeDir="false" afterPath="$PROJECT_DIR$/crud/ConsultantProfile.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/crud/JobDescription.py" beforeDir="false" afterPath="$PROJECT_DIR$/crud/JobDescription.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/crud/MatchResult.py" beforeDir="false" afterPath="$PROJECT_DIR$/crud/MatchResult.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/crud/Notification.py" beforeDir="false" afterPath="$PROJECT_DIR$/crud/Notification.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/crud/WorkflowStatus.py" beforeDir="false" afterPath="$PROJECT_DIR$/crud/WorkflowStatus.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/model/ConsultantProfile.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/ConsultantProfile.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/model/JobDescription.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/JobDescription.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/MatchResult.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/MatchResult.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/Notification.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/Notification.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/WorkflowStatus.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/WorkflowStatus.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/user.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/router/ConsultantProfile.py" beforeDir="false" afterPath="$PROJECT_DIR$/router/ConsultantProfile.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/router/JobDescription.py" beforeDir="false" afterPath="$PROJECT_DIR$/router/JobDescription.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/router/MatchResult.py" beforeDir="false" afterPath="$PROJECT_DIR$/router/MatchResult.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/router/Notification.py" beforeDir="false" afterPath="$PROJECT_DIR$/router/Notification.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/router/WorkflowStatus.py" beforeDir="false" afterPath="$PROJECT_DIR$/router/WorkflowStatus.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/router/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/router/user.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/schema/ConsultantProfile.py" beforeDir="false" afterPath="$PROJECT_DIR$/schema/ConsultantProfile.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/schema/JobDescription.py" beforeDir="false" afterPath="$PROJECT_DIR$/schema/JobDescription.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/schema/MatchResult.py" beforeDir="false" afterPath="$PROJECT_DIR$/schema/MatchResult.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/schema/Notification.py" beforeDir="false" afterPath="$PROJECT_DIR$/schema/Notification.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/schema/WorkflowStatus.py" beforeDir="false" afterPath="$PROJECT_DIR$/schema/WorkflowStatus.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/schema/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/schema/user.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/uv.lock" beforeDir="false" afterPath="$PROJECT_DIR$/uv.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utility/agentic_flow.py" beforeDir="false" afterPath="$PROJECT_DIR$/utility/agentic_flow.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utility/file_reader_using_genai.py" beforeDir="false" afterPath="$PROJECT_DIR$/utility/file_reader_using_genai.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

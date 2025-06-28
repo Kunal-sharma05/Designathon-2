@@ -1,10 +1,12 @@
-from fastapi import APIRouter, Depends, status, HTTPException, Query, Path
+from fastapi import APIRouter, Depends, status, HTTPException, Query, Path, UploadFile, File
 from crud import JobDescription as job_description_service
 from db.database import db_dependency
 from schema.JobDescription import JobDescriptionRequest
 from utility.logging_config import logger
 from core.security import get_current_user
 from typing import Annotated
+from PyPDF2 import PdfReader
+from utility.jobdescription_reader import extract_information
 
 router = APIRouter()
 
@@ -85,6 +87,61 @@ async def create_job_description(user: Annotated[dict, Depends(get_current_user)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred while creating the job description."
+        )
+
+
+@router.post("/upload-job-descriptions/", status_code=status.HTTP_200_OK)
+async def upload_job_descriptions(
+        user: Annotated[dict, Depends(get_current_user)],
+        db: db_dependency,
+        files: list[UploadFile] = File(...)
+):
+    """
+    Endpoint to upload multiple job description PDF files and process their content.
+    """
+    processed_results = []
+
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User is not authorized"
+        )
+
+    if not files:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No files provided for upload."
+        )
+
+    try:
+        logger.debug("Uploading and processing multiple job description PDFs.")
+        for file in files:
+            if file.content_type != "application/pdf":
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"File {file.filename} is not a valid PDF."
+                )
+
+            logger.debug(f"Reading file: {file.filename}")
+            pdf_reader = PdfReader(file.file)
+            pdf_content = ""
+
+            for page in pdf_reader.pages:
+                pdf_content += page.extract_text()
+
+            logger.info(f"Extracted content from {file.filename}")
+            processed_result = extract_information(pdf_content)  # Assuming a similar function exists
+            job_description_service.add_job_description(db, processed_result, user.id, user.email)
+            processed_results.append({file.filename: processed_result})
+
+        logger.info("Successfully processed all job description PDFs.")
+        return {"message": "Job description PDFs processed successfully.", "results": processed_results}
+
+    except Exception as e:
+        logger.error(f"Error occurred while processing job description PDFs: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while processing the job description PDFs."
         )
 
 

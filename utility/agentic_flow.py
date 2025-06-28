@@ -139,7 +139,7 @@ def send_notifications(state: MatchState, db: Session) -> None:
         recipient_email="recipient@example.com",  # Replace with actual recipient
         email_content=message,
         status="pending",
-        sent_at=datetime.utcnow()
+        sent_at=datetime.now()
     )
     db.add(email_notification)
     db.commit()
@@ -150,17 +150,54 @@ def send_notifications(state: MatchState, db: Session) -> None:
 # --- Helper: LLM Similarity Scoring ---
 def get_llm_similarity_scores(job_description: str, resumes: List[str]) -> List[float]:
     """
-    Uses GPT-3.5 to generate semantic similarity scores between job description and each resume.
+    Uses GPT-4o to generate semantic similarity scores between job description and each resume.
     Scores are from 0 to 1.
     """
-    prompt_template = """Rate the match between the following job description and the resume on a scale of 0 to 1:
-Job Description:
-{job_description}
+    prompt_template = f"""Task :- To rate the match between the {job_description} and the {resumes} on a scale of 0 to 1, you can follow these steps:
 
-Resume:
-{resume}
+                Evaluation Criteria
+                    Skills Match: Assess the overlap between the required skills in the job description and the skills listed in the resume.
+                    Experience Match: Compare the years of experience required in the job description with the candidate's experience in the resume.
+                    Description Match: Compare the candidate's past project experience with the description given in job description
+                    Location Match: Check if the candidate's location aligns with the job location or if remote work is acceptable.
+                    Availability: Verify if the candidate's availabale or not ("avialable","busy","unavailable")
+                    Role/Title Alignment: Evaluate whether the candidate's previous roles align with the job title or responsibilities.
+                    Scoring Process
+                - Assign a score for each criterion (e.g., skills, experience, location, etc.).
+                - Combine the scores into a weighted average or a hybrid score (e.g., 30% skills match, 20% experience match, 30% description match, 10% location match, 10% availability).
+                Example
+                    Job Description:
+                    Title: Software Engineer
+                    Skills: Python, Machine Learning, SQL
+                    Experience: 3+ years
+                    Description: Responsible for developing and deploying machine learning models, optimizing SQL databases, and creating scalable Python-based applications for data-driven decision-making.
+                    Location: New York, NY
+                Resume:
+                    Name: John Doe
+                    Skills: Python, SQL, Data Analysis
+                    Experience: 4 years
+                    Location: Remote (willing to relocate)
+                    Projects:
+                            Project 1: Developed a Python-based data pipeline to process and analyze 1TB of data daily, improving processing speed by 30%.
+                            Project 2: Designed and optimized SQL databases for a fintech company, reducing query time by 40%.
+                            Project 3: Built a predictive analytics dashboard using Python and data visualization libraries, enabling real-time decision-making for marketing campaigns.
+                    Availability: available
+                    
+                Match Score:
+                    Skills Match: Python (yes), Machine Learning (no), SQL (yes) → 2/3 = 0.67
+                    Experience Match: 4 years vs. 3+ years → 1.0
+                    Description match: Strong alignment in Python and SQL projects, partial alignment in machine learning responsibilities → 0.9
+                    Location Match: Willing to relocate → 0.8
+                    Availability: available → 1.0
+                    
+                Weighted Score:
+                    Skills (30%): 0.67 × 0.3 = 0.201
+                    Experience (20%): 1.0 × 0.2 = 0.2
+                    Description Match (30%): 0.9 × 0.3 = 0.27
+                    Location (10%): 0.8 × 0.1 = 0.08
+                    Availability (10%): 1.0 × 0.1 = 0.1
 
-Match Score (0-1):"""
+                Final Match Score: 0.201 + 0.2 + 0.27 + 0.08 + 0.1 = 0.851:"""
 
     scores = []
     for resume in resumes:
@@ -169,7 +206,7 @@ Match Score (0-1):"""
                 model="gtp-4o",
                 messages=[
                     {"role": "system",
-                     "content": "You are an AI assistant that evaluates how well a resume matches a job description."},
+                     "content": "You are a Human Resource person having 10 years of experience that evaluates how well a resume matches a job description."},
                     {"role": "user", "content": prompt_template.format(
                         job_description=job_description,
                         resume=resume
