@@ -15,6 +15,7 @@ class NotificationSchema(BaseModel):
                        It contains an "@" symbol followed by a domain name.
                        The domain name is followed by a dot and a top-level domain (TLD) with at least two characters."""
     )
+    email_content: str
     status: NotificationStatusEnum = Field(default=NotificationStatusEnum.pending, description="Notification status")
     sent_at: Optional[datetime] = Field(None, description="Timestamp when the notification was sent")
 

@@ -9,7 +9,8 @@ class Notification(base):
     __allow_unmapped__ = True
 
     id = Column(Integer, primary_key=True)  # UUID
-    job_description_id = Column(ForeignKey("job_descriptions.id"))  # foreign key to job_descriptions.id
+    job_description_id = Column(ForeignKey("job_descriptions.id"))
+    email_content = Column(String(1000))# foreign key to job_descriptions.id
     workflow_status_id = Column(ForeignKey("workflow_statuses.id"))
     recipient_email = Column(String(255), nullable=False)
     status = Column(Enum(NotificationStatusEnum), default=NotificationStatusEnum.pending)

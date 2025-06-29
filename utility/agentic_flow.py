@@ -6,8 +6,10 @@ from datetime import datetime
 from dotenv import load_dotenv
 import os
 from utility.embeddings import get_embedding
+from model.WorkflowStatus import WorkflowStatus
 from schema.JobDescription import JobDescriptionRequestorOutput
 from schema.ConsultantProfile import ConsultantProfileSchema
+from schema.WorkflowStatus import WorkflowStatusSchema, WorkflowProgressEnum
 from openai import AzureOpenAI
 from model.Notification import Notification
 from sqlalchemy.orm import Session
@@ -16,6 +18,8 @@ from utility.send_email import send_email
 from db.database import db_dependency
 
 import logging
+
+db = db_dependency
 
 logger = logging.getLogger(__name__)
 load_dotenv()
@@ -34,6 +38,7 @@ client = AzureOpenAI(
 class MatchState(TypedDict):
     job_description: JobDescriptionRequestorOutput
     consultant_profiles: List[ConsultantProfileSchema]
+    workflow_status: WorkflowStatusSchema
     jd_text: str
     profile_embeddings: List[np.ndarray]
     ranked_profiles: List[Dict[str, Any]]
@@ -63,6 +68,10 @@ def compare_profiles(state: MatchState) -> MatchState:
             profile_embeddings.append(get_embedding(profile_text))
             print(profile_embeddings[-1])  # Debug: Print the last profile embedding
         state["profile_embeddings"] = profile_embeddings
+        state["workflow_status"].progress = WorkflowProgressEnum.PROCESSING
+        new_workflow_status = WorkflowStatus(**state["workflow_status"].model_dump())
+        db.add(new_workflow_status)
+        db.commit()
 
         return state
 
@@ -136,10 +145,15 @@ def send_notifications(state: MatchState, db: Session) -> None:
     else:
         message = f"No suitable matches found for Job ID: {jd_id}. Please review manually."
 
+    state["workflow_status"].progress = WorkflowProgressEnum.COMPLETED
+    new_workflow_status = WorkflowStatus(**state["workflow_status"].model_dump())
+    db.add(new_workflow_status)
+    db.commit()
     # Save email content to the database
     email_notification = Notification(
-        jd_id=jd_id,
-        recipient_email=jd.requestor_email,  # Replace with actual recipient
+        job_description_id=jd_id,
+        recipient_email=jd.requestor_email,
+        # Replace with actual recipient
         email_content=message,
         status="pending",
         sent_at=datetime.now()
@@ -211,7 +225,7 @@ def get_llm_similarity_scores(job_description: str, resumes: List[str]) -> List[
     for resume in resumes:
         try:
             response = client.chat.completions.create(
-                model="gtp-4o",
+                model="gpt-4o",
                 messages=[
                     {"role": "system",
                      "content": "You are a Human Resource person having 10 years of experience that evaluates how well a resume matches a job description."},
@@ -239,7 +253,7 @@ workflow = StateGraph(MatchState)
 workflow.add_node("compare", compare_profiles)
 workflow.add_node("ranking", rank_profiles)
 # workflow.add_node("communication", send_notifications)
-workflow.add_node("communication", send_notifications)
+workflow.add_node("communication", lambda state: send_notifications(state, db_dependency))
 
 # Set entry point
 workflow.set_entry_point("compare")
@@ -271,16 +285,20 @@ def run_agent_matching(db: db_dependency, jd: JobDescriptionRequestorOutput,
     Returns:
         Dictionary with 'top_matches' and 'all_matches'
     """
+    workflow_status = WorkflowStatusSchema(
+        job_description_id=jd.id,
+        steps={"jd_parsed": True, "profiles_compared": False}
+    )
     initial_state = {
         "job_description": jd,
-        "consultant_profiles": profiles
+        "consultant_profiles": profiles,
+        "workflow_status": workflow_status
     }
 
     def communication_with_db(state: MatchState):
         send_notifications(state, db)
 
     # Replace the communication node dynamically **before invoking the graph**
-    workflow.add_node("communication", communication_with_db)
 
     result = app.invoke(initial_state)
     return {
