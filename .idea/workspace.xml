@@ -5,8 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="72ad22ff-a087-495b-b326-f10a210aebb5" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/utility/send_email.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/security.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/security.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/crud/MatchResult.py" beforeDir="false" afterPath="$PROJECT_DIR$/crud/MatchResult.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/router/JobDescription.py" beforeDir="false" afterPath="$PROJECT_DIR$/router/JobDescription.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/schema/JobDescription.py" beforeDir="false" afterPath="$PROJECT_DIR$/schema/JobDescription.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utility/agentic_flow.py" beforeDir="false" afterPath="$PROJECT_DIR$/utility/agentic_flow.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -72,15 +77,5 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/db/database.py</url>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>

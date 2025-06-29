@@ -1,7 +1,4 @@
-# agent_flow.py
-from langchain_core.runnables import RunnableLambda
 import faiss
-import os
 from langgraph.graph import StateGraph, START, END
 from typing import TypedDict, List, Dict, Any
 import numpy as np
@@ -9,27 +6,33 @@ from datetime import datetime
 from dotenv import load_dotenv
 import os
 from utility.embeddings import get_embedding
-from schema.JobDescription import JobDescriptionRequest
+from schema.JobDescription import JobDescriptionRequestorOutput
 from schema.ConsultantProfile import ConsultantProfileSchema
 from openai import AzureOpenAI
 from model.Notification import Notification
 from sqlalchemy.orm import Session
 from typing import Any, List
+from utility.send_email import send_email
+from db.database import db_dependency
+
+import logging
+
+logger = logging.getLogger(__name__)
 load_dotenv()
 
 api_key = os.getenv("openai_api_key")
 
 # Initialize Azure OpenAI client
 client = AzureOpenAI(
-    api_version="2024-12-01-preview",  # Use the specified API version
-    azure_endpoint="https://openai2525252.openai.azure.com/",  # Replace with your Azure OpenAI endpoint
+    api_version=os.getenv("openai_api_version"),  # Use the specified API version
+    azure_endpoint=os.getenv("azure_endpoint"),  # Replace with your Azure OpenAI endpoint
     api_key=api_key  # Replace with your Azure OpenAI API key
 )
 
 
 # Define state for LangGraph
 class MatchState(TypedDict):
-    job_description: JobDescriptionRequest
+    job_description: JobDescriptionRequestorOutput
     consultant_profiles: List[ConsultantProfileSchema]
     jd_text: str
     profile_embeddings: List[np.ndarray]
@@ -50,7 +53,7 @@ def compare_profiles(state: MatchState) -> MatchState:
         jd_text = f"{jd.title} {jd.department or ''} {jd.location or ''} {jd.experience or ''} {jd.description or ''} " \
                   f"{', '.join(jd.skills) if jd.skills else ''}"
         state["jd_text"] = jd_text
-        jd_embedding = get_embedding(jd_text)
+        # jd_embedding = get_embedding(jd_text)
 
         # Generate embeddings for all consultant profiles
         profile_embeddings = []
@@ -95,7 +98,7 @@ def rank_profiles(state: MatchState) -> MatchState:
         matches = []
         for idx_in_search, llm_score in zip(I[0], llm_scores):
             faiss_score = float(1 - D[0][idx_in_search])
-            hybrid_score = 0.6 * faiss_score + 0.4 * llm_score
+            hybrid_score = 0.4 * faiss_score + 0.6 * llm_score
             matches.append({
                 "profile": profiles[idx_in_search],
                 "similarity_score": hybrid_score
@@ -136,13 +139,18 @@ def send_notifications(state: MatchState, db: Session) -> None:
     # Save email content to the database
     email_notification = Notification(
         jd_id=jd_id,
-        recipient_email="recipient@example.com",  # Replace with actual recipient
+        recipient_email=jd.requestor_email,  # Replace with actual recipient
         email_content=message,
         status="pending",
         sent_at=datetime.now()
     )
-    db.add(email_notification)
-    db.commit()
+    try:
+        logger.debug("Send email agent")
+        db.add(email_notification)
+        db.commit()
+        send_email(jd.requestor_email, "test", message)
+    except Exception as e:
+        logger.error(f"Error during send email notification agent {e}")
 
     print(f"📧 Email notification created for Job ID: {jd_id}")
 
@@ -228,9 +236,10 @@ def get_llm_similarity_scores(job_description: str, resumes: List[str]) -> List[
 workflow = StateGraph(MatchState)
 
 # Add nodes
-workflow.add_node("compare", RunnableLambda(compare_profiles))
-workflow.add_node("ranking", RunnableLambda(rank_profiles))
-workflow.add_node("communication", RunnableLambda(send_notifications))
+workflow.add_node("compare", compare_profiles)
+workflow.add_node("ranking", rank_profiles)
+# workflow.add_node("communication", send_notifications)
+workflow.add_node("communication", send_notifications)
 
 # Set entry point
 workflow.set_entry_point("compare")
@@ -238,7 +247,9 @@ workflow.set_entry_point("compare")
 # Link processing chain
 workflow.add_edge("compare", "ranking")
 # workflow.add_edge("ranking", "communication")
-workflow.add_edge("ranking", END)
+workflow.add_edge("ranking", "communication")
+
+workflow.add_edge("communication", END)
 
 # Compile the agent flow
 app = workflow.compile()
@@ -247,7 +258,8 @@ print("✅ Multi-Agent Recruitment Matching System is ready.")
 
 
 # === Public Function to Use in Your CRUD Code ===
-def run_agent_matching(db: Any, jd: JobDescriptionRequest, profiles: List[ConsultantProfileSchema]) -> dict:
+def run_agent_matching(db: db_dependency, jd: JobDescriptionRequestorOutput,
+                       profiles: List[ConsultantProfileSchema]) -> dict:
     """
     Run the agent-based matching flow for a given job description and list of consultant profiles.
 
@@ -263,6 +275,12 @@ def run_agent_matching(db: Any, jd: JobDescriptionRequest, profiles: List[Consul
         "job_description": jd,
         "consultant_profiles": profiles
     }
+
+    def communication_with_db(state: MatchState):
+        send_notifications(state, db)
+
+    # Replace the communication node dynamically **before invoking the graph**
+    workflow.add_node("communication", communication_with_db)
 
     result = app.invoke(initial_state)
     return {

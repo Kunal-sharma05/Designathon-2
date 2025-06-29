@@ -1,11 +1,7 @@
 import os
 from typing import Annotated
-
 from fastapi import Depends, HTTPException, status
 from passlib.context import CryptContext
-from sqlalchemy.orm import Session
-
-from db.database import sessionLocal, db_dependency
 from model.user import UserDetails as user_model
 from jose import jwt, JWTError
 from fastapi.security import OAuth2PasswordBearer
@@ -20,6 +16,8 @@ ALGORITHM = os.getenv("ALGORITHM")
 bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
 Oauth2_bearer = OAuth2PasswordBearer(tokenUrl="/token")
+
+db = db_dependency
 
 
 async def authenticate_user(email: str, password: str, db: db_dependency):
@@ -51,8 +49,9 @@ async def get_current_user(token: Annotated[str, Depends(Oauth2_bearer)]):
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str = payload.get('sub')
         user_id: str = payload.get('id')
+        role: str = payload.get('role')
         if email is None or user_id is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not authorized")
-        return {'email': email, 'id': user_id}
+        return {'email': email, 'id': user_id, 'role': role}
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not authorized")

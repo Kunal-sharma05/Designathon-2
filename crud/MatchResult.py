@@ -4,9 +4,10 @@ from model.MatchResult import MatchResult as MatchResultModel
 from model.MatchResult import MatchResult  # Assuming this is the ORM model
 from schema.MatchResult import MatchResultSchema
 from model.JobDescription import JobDescription
-from model.ConsultantProfile import ConsultantProfile,ConsultantEnum
+from model.ConsultantProfile import ConsultantProfile, ConsultantEnum
 from utility.agentic_flow import run_agent_matching
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -14,7 +15,8 @@ def get_all_match_results(db: db_dependency, jobDescription_id: int):
     try:
         logger.debug("Fetching all match results from the database.")
         jd = db.query(JobDescription).filter(JobDescription.id == jobDescription_id).first()
-        profiles = db.query(ConsultantProfile).filter(ConsultantProfile.status != ConsultantEnum.unavailable).all()
+        profiles = db.query(ConsultantProfile).filter(
+            ConsultantProfile.availability != ConsultantEnum.unavailable).all()
         if not jd or not profiles:
             print(f"Job Descriptions or Profiles not found for Job ID: {jobDescription_id}")
         logger.debug("Invoking run_agent_matching function.")

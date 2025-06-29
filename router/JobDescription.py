@@ -79,8 +79,10 @@ async def create_job_description(user: Annotated[dict, Depends(get_current_user)
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not authorized")
     try:
+        id = user.get("id")
+        email = user.get("email")
         logger.debug("Creating a new job description.")
-        job_description = job_description_service.add_job_description(db, job_description_request)
+        job_description = job_description_service.add_job_description(db, job_description_request,id,email)
         logger.info("Successfully created a new job description.")
         return job_description
     except Exception as e:
@@ -131,8 +133,11 @@ async def upload_job_descriptions(
                 pdf_content += page.extract_text()
 
             logger.info(f"Extracted content from {file.filename}")
+            id = user.get("id")
+            email = user.get("email")
+            logger.debug("Creating a new job description.")
             processed_result = extract_information(pdf_content)  # Assuming a similar function exists
-            job_description_service.add_job_description(db, processed_result, user.id, user.email)
+            job_description_service.add_job_description(db, processed_result, id, email)
             processed_results.append({file.filename: processed_result})
 
         logger.info("Successfully processed all job description PDFs.")
@@ -196,14 +201,14 @@ async def update_job_description_status(
         user: Annotated[dict, Depends(get_current_user)],
         db: db_dependency,
         job_description_id: int = Path(...),
-        status: str = Query(...),
+        status_notification: str = Query(...),
 ):
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not authorized")
     try:
-        logger.debug(f"Updating status of job description with ID: {job_description_id} to {status}.")
-        job_description = job_description_service.update_job_description_status(db, job_description_id, status)
-        logger.info(f"Successfully updated status of job description with ID: {job_description_id} to {status}.")
+        logger.debug(f"Updating status of job description with ID: {job_description_id} to {status_notification}.")
+        job_description = job_description_service.update_job_description_status(db, job_description_id, status_notification)
+        logger.info(f"Successfully updated status of job description with ID: {job_description_id} to {status_notification}.")
         return job_description
     except HTTPException as http_exc:
         raise http_exc

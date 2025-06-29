@@ -3,6 +3,7 @@ from typing import List, Optional
 from datetime import datetime
 from model.JobDescriptionEnum import JobDescriptionEnum
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -18,3 +19,7 @@ class JobDescriptionRequest(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class JobDescriptionRequestorOutput(JobDescriptionRequest):
+    requestor_email: str
