@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 from typing import Any, List
 from utility.send_email import send_email
 from db.database import db_dependency
+from fastapi import HTTPException, status
 
 import logging
 
@@ -145,15 +146,22 @@ def send_notifications(state: MatchState, db: Session) -> None:
     else:
         message = f"No suitable matches found for Job ID: {jd_id}. Please review manually."
 
-    state["workflow_status"].progress = WorkflowProgressEnum.COMPLETED
-    new_workflow_status = WorkflowStatus(**state["workflow_status"].model_dump())
-    db.add(new_workflow_status)
+    result = db.query(WorkflowStatus).filter(WorkflowStatus.job_description_id == jd_id).first()
+    if not result:
+        logger.warning(f"Workflow status with ID {id} not found for update.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Workflow status not found."
+        )
+    for key, value in state["workflow_status"].model_dump().items():
+        setattr(result, key, value)
+    db.add(result)
     db.commit()
     # Save email content to the database
     email_notification = Notification(
         job_description_id=jd_id,
         recipient_email=jd.requestor_email,
-        # Replace with actual recipient
+        workflow_status_id=result.id,
         email_content=message,
         status="pending",
         sent_at=datetime.now()

@@ -21,4 +21,4 @@ class JobDescription(base):
     user_id = Column(ForeignKey("user_details.id"))
     users = relationship("UserDetails", back_populates="job_descriptions")
     matched_results = relationship("MatchResult", back_populates="job_description",cascade="all,delete-orphan")
-    workflow_status = relationship("WorkflowStatus", back_populates="job_description", cascade="all,delete-orphan")
+    workflow_status = relationship("WorkflowStatus", back_populates="job_description", cascade="all,delete-orphan", uselist=False)

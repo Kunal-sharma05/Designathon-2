@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from model.user_role import UserRole
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -15,3 +16,8 @@ class UserDetailsRequest(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class UserLoginRequest(BaseModel):
+    email: str
+    password: str

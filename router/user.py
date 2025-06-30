@@ -7,7 +7,7 @@ from db.database import sessionLocal, db_dependency
 from core import security
 from fastapi.security import OAuth2PasswordRequestForm
 from schema.token import Token
-from schema.user import UserDetailsRequest
+from schema.user import UserDetailsRequest, UserLoginRequest
 from model.user import UserDetails
 import logging
 logger = logging.getLogger(__name__)
@@ -86,16 +86,16 @@ async def delete_user_details(db: db_dependency, user_id: str = Query()):
 
 
 # Login method
-@router.put("/token", response_model=Token)
-async def login_form(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: db_dependency):
+@router.post("/token", response_model=Token)
+async def login_form(user_details: UserLoginRequest, db: db_dependency):
     try:
-        logger.debug(f"Authenticating user with username: {form_data.username}.")
-        user = await security.authenticate_user(form_data.username, form_data.password, db)
+        logger.debug(f"Authenticating user with username: {user_details.email}.")
+        user = await security.authenticate_user(user_details.email, user_details.password, db)
         if not user:
-            logger.warning(f"Authentication failed for username: {form_data.username}.")
+            logger.warning(f"Authentication failed for username: {user_details.email}.")
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not authorized")
         token = await security.create_access_token(user.email, user.id, timedelta(minutes=20), db)
-        logger.info(f"Successfully authenticated user: {form_data.username}.")
+        logger.info(f"Successfully authenticated user: {user_details.email}.")
         return {'access_token': token, 'token_type': 'bearer'}
     except HTTPException as http_exc:
         raise http_exc

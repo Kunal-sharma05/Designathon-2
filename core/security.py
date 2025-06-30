@@ -17,7 +17,6 @@ bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
 Oauth2_bearer = OAuth2PasswordBearer(tokenUrl="/token")
 
-db = db_dependency
 
 
 async def authenticate_user(email: str, password: str, db: db_dependency):
