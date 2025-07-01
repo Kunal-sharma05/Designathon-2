@@ -1,12 +1,15 @@
 from fastapi import HTTPException, status
 from db.database import db_dependency
-from model.MatchResult import MatchResult as MatchResultModel
 from model.MatchResult import MatchResult  # Assuming this is the ORM model
 from schema.MatchResult import MatchResultSchema
 from model.JobDescription import JobDescription
 from model.ConsultantProfile import ConsultantProfile, ConsultantEnum
+from model.WorkflowStatus import WorkflowStatus, WorkflowProgressEnum
+from model.Notification import Notification, NotificationStatusEnum
 from utility.agentic_flow import run_agent_matching
+from utility.send_email import send_email
 import logging
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -19,18 +22,40 @@ def get_all_match_results(db: db_dependency, jobDescription_id: int):
             ConsultantProfile.availability != ConsultantEnum.unavailable).all()
         if not jd or not profiles:
             print(f"Job Descriptions or Profiles not found for Job ID: {jobDescription_id}")
+        workflow_status = WorkflowStatus(
+            job_description_id=jobDescription_id,
+            steps={"jd_parsed": True, "profiles_compared": False},
+            progress=WorkflowProgressEnum.PROCESSING,
+        )
+        db.add(workflow_status)
+        db.commit()
         logger.debug("Invoking run_agent_matching function.")
         result = run_agent_matching(db, jd, profiles)
+        if not result:
+            logger.warning(f"Couldn't start  for  {id} not found fo.")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Workflow status not found."
+            )
+        message = result.get("message")
+        try:
+            send_email(jd.requestor_email, "test", message)
+        except Exception as e:
+            logger.error(f"Error during send email notification agent {e}")
+        workflow_status = db.query(WorkflowStatus).filter(WorkflowStatus.job_description_id == jobDescription_id).first()
+        workflow_status.progress = WorkflowProgressEnum.COMPLETED
+        db.add(workflow_status)
+        db.commit()
         all_matches = result.get("all_matches", [])
 
         if not all_matches:
             print(f"No matches found for job_id: {jobDescription_id}")
 
-        db.query(MatchResultModel).filter(MatchResultModel.job_description_id == jobDescription_id).delete()
+        db.query(MatchResult).filter(MatchResult.job_description_id == jobDescription_id).delete()
         db.commit()
 
         for idx, match in enumerate(all_matches):
-            matched_profile = MatchResultModel(
+            matched_profile = MatchResult(
                 rank=idx + 1,
                 job_description_id=jobDescription_id,
                 consultant_id=match["profile"].id,
@@ -54,7 +79,16 @@ def get_all_match_results(db: db_dependency, jobDescription_id: int):
             }
             for idx, match in enumerate(all_matches)
         ]
-
+        email_notification = Notification(
+            job_description_id=jobDescription_id,
+            recipient_email=jd.requestor_email,
+            workflow_status_id=workflow_status.id,
+            email_content=result.get("message"),
+            status="sent",
+            sent_at=datetime.now()
+        )
+        db.add(email_notification)
+        db.commit()
         logger.info("Successfully fetched all match results.")
         return serialized_matches
 

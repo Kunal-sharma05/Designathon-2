@@ -20,7 +20,6 @@ from fastapi import HTTPException, status
 
 import logging
 
-db = db_dependency
 
 logger = logging.getLogger(__name__)
 load_dotenv()
@@ -39,8 +38,9 @@ client = AzureOpenAI(
 class MatchState(TypedDict):
     job_description: JobDescriptionRequestorOutput
     consultant_profiles: List[ConsultantProfileSchema]
-    workflow_status: WorkflowStatusSchema
+    # workflow_status: WorkflowStatusSchema
     jd_text: str
+    message: str
     profile_embeddings: List[np.ndarray]
     ranked_profiles: List[Dict[str, Any]]
     top_matches: List[Dict[str, Any]]
@@ -69,10 +69,6 @@ def compare_profiles(state: MatchState) -> MatchState:
             profile_embeddings.append(get_embedding(profile_text))
             print(profile_embeddings[-1])  # Debug: Print the last profile embedding
         state["profile_embeddings"] = profile_embeddings
-        state["workflow_status"].progress = WorkflowProgressEnum.PROCESSING
-        new_workflow_status = WorkflowStatus(**state["workflow_status"].model_dump())
-        db.add(new_workflow_status)
-        db.commit()
 
         return state
 
@@ -133,7 +129,7 @@ def rank_profiles(state: MatchState) -> MatchState:
 
 
 # --- Communication Agent ---
-def send_notifications(state: MatchState, db: Session) -> None:
+def send_notifications(state: MatchState) -> None:
     jd = state["job_description"]
     top_matches = state.get("top_matches", [])
     jd_id = jd.id
@@ -146,33 +142,8 @@ def send_notifications(state: MatchState, db: Session) -> None:
     else:
         message = f"No suitable matches found for Job ID: {jd_id}. Please review manually."
 
-    result = db.query(WorkflowStatus).filter(WorkflowStatus.job_description_id == jd_id).first()
-    if not result:
-        logger.warning(f"Workflow status with ID {id} not found for update.")
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Workflow status not found."
-        )
-    for key, value in state["workflow_status"].model_dump().items():
-        setattr(result, key, value)
-    db.add(result)
-    db.commit()
+    state["message"]=message
     # Save email content to the database
-    email_notification = Notification(
-        job_description_id=jd_id,
-        recipient_email=jd.requestor_email,
-        workflow_status_id=result.id,
-        email_content=message,
-        status="pending",
-        sent_at=datetime.now()
-    )
-    try:
-        logger.debug("Send email agent")
-        db.add(email_notification)
-        db.commit()
-        send_email(jd.requestor_email, "test", message)
-    except Exception as e:
-        logger.error(f"Error during send email notification agent {e}")
 
     print(f"📧 Email notification created for Job ID: {jd_id}")
 
@@ -261,7 +232,7 @@ workflow = StateGraph(MatchState)
 workflow.add_node("compare", compare_profiles)
 workflow.add_node("ranking", rank_profiles)
 # workflow.add_node("communication", send_notifications)
-workflow.add_node("communication", lambda state: send_notifications(state, db_dependency))
+workflow.add_node("communication", send_notifications)
 
 # Set entry point
 workflow.set_entry_point("compare")
@@ -293,23 +264,29 @@ def run_agent_matching(db: db_dependency, jd: JobDescriptionRequestorOutput,
     Returns:
         Dictionary with 'top_matches' and 'all_matches'
     """
-    workflow_status = WorkflowStatusSchema(
-        job_description_id=jd.id,
-        steps={"jd_parsed": True, "profiles_compared": False}
-    )
+    logger.debug("Starting agent-based matching flow...")
+    # workflow_status = WorkflowStatusSchema(
+    #     job_description_id=jd.id,
+    #     steps={"jd_parsed": True, "profiles_compared": False},
+    #     progress=WorkflowProgressEnum.PROCESSING,
+    # )
+    logger.debug("after workflow status agent-based matching flow...")
     initial_state = {
         "job_description": jd,
-        "consultant_profiles": profiles,
-        "workflow_status": workflow_status
+        "consultant_profiles": profiles
+        # "workflow_status": workflow_status
     }
 
     def communication_with_db(state: MatchState):
-        send_notifications(state, db)
+        send_notifications(state)
 
     # Replace the communication node dynamically **before invoking the graph**
 
     result = app.invoke(initial_state)
+
+    print(result)
     return {
         "top_matches": result.get("top_matches"),
-        "all_matches": result.get("all_matches")
+        "all_matches": result.get("all_matches"),
+        "message": result.get("message")
     }
