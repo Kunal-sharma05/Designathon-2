@@ -15,7 +15,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
 bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
-Oauth2_bearer = OAuth2PasswordBearer(tokenUrl="/token")
+Oauth2_bearer = OAuth2PasswordBearer(tokenUrl="/api/user/token")
 
 
 
