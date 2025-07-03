@@ -14,3 +14,4 @@ class MatchResult(base):
     rank = Column(Integer, nullable=False)
     matched_at = Column(DateTime, default=datetime.now)
     job_description = relationship("JobDescription", back_populates="matched_results", uselist=False)
+    consultant_profile = relationship("ConsultantProfile", back_populates="matched_results", uselist=False)

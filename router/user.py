@@ -32,7 +32,7 @@ async def read_all(db: db_dependency):
 
 
 # POST method
-@router.post("/user_details", status_code=status.HTTP_201_CREATED)
+@router.post("/signup", status_code=status.HTTP_201_CREATED)
 async def create_user(user_details_request: UserDetailsRequest, db: db_dependency):
     try:
         logger.debug("Creating a new user.")
@@ -87,15 +87,15 @@ async def delete_user_details(db: db_dependency, user_id: str = Query()):
 
 # Login method
 @router.post("/token", response_model=Token)
-async def login_form(user_details: UserLoginRequest, db: db_dependency):
+async def login_form(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: db_dependency):
     try:
-        logger.debug(f"Authenticating user with username: {user_details.email}.")
-        user = await security.authenticate_user(user_details.email, user_details.password, db)
+        logger.debug(f"Authenticating user with username: {form_data.username}.")
+        user = await security.authenticate_user(form_data.username, form_data.password, db)
         if not user:
-            logger.warning(f"Authentication failed for username: {user_details.email}.")
+            logger.warning(f"Authentication failed for username: {form_data.username}.")
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not authorized")
         token = await security.create_access_token(user.email, user.id, timedelta(minutes=20), db)
-        logger.info(f"Successfully authenticated user: {user_details.email}.")
+        logger.info(f"Successfully authenticated user: {form_data.username}.")
         return {'access_token': token, 'token_type': 'bearer'}
     except HTTPException as http_exc:
         raise http_exc
@@ -105,8 +105,8 @@ async def login_form(user_details: UserLoginRequest, db: db_dependency):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred during authentication."
         )
-
-
+ 
+ 
 # Verify Email method
 @router.post("/verify-email", status_code=status.HTTP_200_OK)
 async def verify_email(email: str, db: db_dependency):

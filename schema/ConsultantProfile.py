@@ -18,3 +18,6 @@ class ConsultantProfileSchema(BaseModel):
 
     class Config:
         from_attributes = True
+
+class ConsultantProfileOutput(ConsultantProfileSchema):
+    id: int

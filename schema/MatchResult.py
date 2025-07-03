@@ -18,5 +18,5 @@ class MatchResultSchema(BaseModel):
         from_attributes = True
 
 
-class MatchResultSchemaCreate(MatchResultSchema):
-    pass
+class MatchResultOutput(MatchResultSchema):
+    id: int

@@ -1,16 +1,17 @@
 from fastapi import HTTPException, status
 from db.database import db_dependency
 from model.ConsultantProfile import ConsultantProfile  # Assuming this is the ORM model
-from schema.ConsultantProfile import ConsultantProfileSchema
+from schema.ConsultantProfile import ConsultantProfileSchema, ConsultantProfileOutput
 import logging
+
 logger = logging.getLogger(__name__)
 
 
-def get_all_consultant_profiles(db: db_dependency) -> list[ConsultantProfileSchema]:
+def get_all_consultant_profiles(db: db_dependency) -> list[ConsultantProfileOutput]:
     try:
         logger.debug("Fetching all consultant profiles from the database.")
         result = db.query(ConsultantProfile).all()
-        consultant_profiles = [ConsultantProfileSchema.model_validate(item) for item in result]
+        consultant_profiles = [ConsultantProfileOutput.model_validate(item) for item in result]
         logger.info("Successfully fetched all consultant profiles.")
         return consultant_profiles
     except Exception as e:
@@ -21,7 +22,7 @@ def get_all_consultant_profiles(db: db_dependency) -> list[ConsultantProfileSche
         )
 
 
-def get_consultant_profile_by_id(db: db_dependency, id: int) -> ConsultantProfileSchema:
+def get_consultant_profile_by_id(db: db_dependency, id: int) -> ConsultantProfileOutput:
     try:
         logger.debug(f"Fetching consultant profile with ID: {id}.")
         result = db.query(ConsultantProfile).filter(ConsultantProfile.id == id).first()
@@ -31,7 +32,7 @@ def get_consultant_profile_by_id(db: db_dependency, id: int) -> ConsultantProfil
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Consultant profile not found."
             )
-        consultant_profile = ConsultantProfileSchema.model_validate(result)
+        consultant_profile = ConsultantProfileOutput.model_validate(result)
         logger.info(f"Successfully fetched consultant profile with ID: {id}.")
         return consultant_profile
     except HTTPException as http_exc:
@@ -44,7 +45,7 @@ def get_consultant_profile_by_id(db: db_dependency, id: int) -> ConsultantProfil
         )
 
 
-def get_consultant_profiles_by_skill(db: db_dependency, skill: str) -> list[ConsultantProfileSchema]:
+def get_consultant_profiles_by_skill(db: db_dependency, skill: str) -> list[ConsultantProfileOutput]:
     try:
         logger.debug(f"Fetching consultant profiles with skill: {skill}.")
         result = db.query(ConsultantProfile).filter(ConsultantProfile.skills.contains([skill])).all()
@@ -54,7 +55,7 @@ def get_consultant_profiles_by_skill(db: db_dependency, skill: str) -> list[Cons
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="No consultant profiles found with the given skill."
             )
-        consultant_profiles = [ConsultantProfileSchema.model_validate(item) for item in result]
+        consultant_profiles = [ConsultantProfileOutput.model_validate(item) for item in result]
         logger.info(f"Successfully fetched consultant profiles with skill: {skill}.")
         return consultant_profiles
     except HTTPException as http_exc:
@@ -67,7 +68,8 @@ def get_consultant_profiles_by_skill(db: db_dependency, skill: str) -> list[Cons
         )
 
 
-def add_consultant_profile(db: db_dependency, consultant_profile_request: ConsultantProfileSchema) -> ConsultantProfileSchema:
+def add_consultant_profile(db: db_dependency,
+                           consultant_profile_request: ConsultantProfileSchema) -> ConsultantProfileSchema:
     try:
         logger.debug("Attempting to add a new consultant profile.")
         new_consultant_profile = ConsultantProfile(**consultant_profile_request.model_dump())
@@ -83,7 +85,8 @@ def add_consultant_profile(db: db_dependency, consultant_profile_request: Consul
         )
 
 
-def update_consultant_profile_by_id(db: db_dependency, id: int, consultant_profile_request: ConsultantProfileSchema) -> ConsultantProfileSchema:
+def update_consultant_profile_by_id(db: db_dependency, id: int,
+                                    consultant_profile_request: ConsultantProfileSchema) -> ConsultantProfileOutput:
     try:
         logger.debug(f"Attempting to update consultant profile with ID: {id}.")
         result = db.query(ConsultantProfile).filter(ConsultantProfile.id == id).first()
@@ -98,7 +101,7 @@ def update_consultant_profile_by_id(db: db_dependency, id: int, consultant_profi
         db.add(result)
         db.commit()
         logger.info(f"Successfully updated consultant profile with ID: {id}.")
-        return ConsultantProfileSchema.model_validate(result)
+        return ConsultantProfileOutput.model_validate(result)
     except HTTPException as http_exc:
         raise http_exc
     except Exception as e:
@@ -113,6 +116,7 @@ def delete_consultant_profile_by_id(db: db_dependency, id: int) -> None:
     try:
         logger.debug(f"Attempting to delete consultant profile with ID: {id}.")
         result = db.query(ConsultantProfile).filter(ConsultantProfile.id == id).first()
+
         if not result:
             logger.warning(f"Consultant profile with ID {id} not found for deletion.")
             raise HTTPException(
@@ -132,7 +136,30 @@ def delete_consultant_profile_by_id(db: db_dependency, id: int) -> None:
         )
 
 
-def update_consultant_availability(db: db_dependency, id: int, availability: str) -> ConsultantProfileSchema:
+def delete_consultant_profile_by_email(db: db_dependency, email: str) -> None:
+    try:
+        logger.debug(f"Attempting to delete consultant profile with email: {email}.")
+        result = db.query(ConsultantProfile).filter(ConsultantProfile.email == email).first()
+        if not result:
+            logger.warning(f"Consultant profile with email {email} not found for deletion.")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Consultant profile not found."
+            )
+        db.delete(result)
+        db.commit()
+        logger.info(f"Successfully deleted consultant profile with email: {email}.")
+    except HTTPException as http_exc:
+        raise http_exc
+    except Exception as e:
+        logger.error(f"Error occurred while deleting consultant profile with ID {email}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while deleting the consultant profile."
+        )
+
+
+def update_consultant_availability(db: db_dependency, id: int, availability: str) -> ConsultantProfileOutput:
     try:
         logger.debug(f"Attempting to update availability of consultant profile with ID: {id} to {availability}.")
         result = db.query(ConsultantProfile).filter(ConsultantProfile.id == id).first()
@@ -146,7 +173,7 @@ def update_consultant_availability(db: db_dependency, id: int, availability: str
         db.add(result)
         db.commit()
         logger.info(f"Successfully updated availability of consultant profile with ID: {id} to {availability}.")
-        return ConsultantProfileSchema.model_validate(result)
+        return ConsultantProfileOutput.model_validate(result)
     except HTTPException as http_exc:
         raise http_exc
     except Exception as e:

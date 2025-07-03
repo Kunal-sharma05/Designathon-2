@@ -14,7 +14,7 @@ def send_email(to_email, subject, body):
     smtp_password = os.getenv("SMTP_PASSWORD")
 
     print(smtp_server)
-
+    print(to_email)
     msg = MIMEMultipart()
     msg["From"] = smtp_user
     msg["To"] = to_email

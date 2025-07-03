@@ -17,3 +17,4 @@ class ConsultantProfile(base):
     project = Column(String(1000))
     availability = Column(Enum(ConsultantEnum), default=ConsultantEnum.available)
     created_at = Column(DateTime, default=datetime.now)
+    matched_results = relationship("MatchResult", back_populates="consultant_profile", cascade="all,delete-orphan")

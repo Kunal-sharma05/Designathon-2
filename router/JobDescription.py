@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, status, HTTPException, Query, Path, UploadFile, File
 from crud import JobDescription as job_description_service
+from crud import MatchResult as match_result_service
 from db.database import db_dependency
 from schema.JobDescription import JobDescriptionRequest
 from core.security import get_current_user
@@ -7,6 +8,7 @@ from typing import Annotated
 from PyPDF2 import PdfReader
 from utility.jobdescription_reader import extract_information
 import logging
+import requests
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
@@ -60,8 +62,12 @@ async def read_job_description_by_id(user: Annotated[dict, Depends(get_current_u
     try:
         logger.debug(f"Fetching job description with ID: {job_description_id}.")
         job_description = job_description_service.get_job_description_by_id(db, job_description_id)
+        match_results = match_result_service.get_all_match_results(db, job_description_id)
         logger.info(f"Successfully fetched job description with ID: {job_description_id}.")
-        return job_description
+        return {
+            "job_description": job_description,
+            "match_results": match_results
+        }
     except HTTPException as http_exc:
         raise http_exc
     except Exception as e:

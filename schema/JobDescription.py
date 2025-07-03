@@ -24,3 +24,8 @@ class JobDescriptionRequest(BaseModel):
 class JobDescriptionRequestorOutput(JobDescriptionRequest):
     id: int
     requestor_email: str
+
+
+class JobDescriptionOutput(JobDescriptionRequest):
+    id: int
+    requestor_email: str
