@@ -34,15 +34,15 @@ async def top_3_match_results(user: Annotated[dict, Depends(get_current_user)], 
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not authorized")
     try:
-        logger.debug("Fetching all match results.")
-        match_results = match_result_service.get_all_match_results(db, job_description_id)
-        logger.info("Successfully fetched all match results.")
+        logger.debug("Fetching top 3 match results.")
+        match_results = match_result_service.get_top_3_matches(db, job_description_id)
+        logger.info("Successfully fetched top 3 match results.")
         return match_results
     except Exception as e:
-        logger.error(f"Error occurred while fetching match results: {e}")
+        logger.error(f"Error occurred while fetching top 3 match results: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred while fetching match results."
+            detail="An error occurred while fetching top 3 match results."
         )
 
 

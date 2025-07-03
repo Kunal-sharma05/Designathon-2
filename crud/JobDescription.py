@@ -2,14 +2,14 @@ from utility.logging_config import logger
 from fastapi import HTTPException, status
 from db.database import db_dependency
 from model.JobDescription import JobDescription
-from schema.JobDescription import JobDescriptionRequest
+from schema.JobDescription import JobDescriptionRequest, JobDescriptionRequestorOutput
 
 
-def get_all_job_descriptions(db: db_dependency) -> list[JobDescriptionRequest]:
+def get_all_job_descriptions(db: db_dependency) -> list[JobDescriptionRequestorOutput]:
     try:
         logger.debug("Fetching all job descriptions from the database.")
         result = db.query(JobDescription).all()
-        job_descriptions = [JobDescriptionRequest.model_validate(item) for item in result]
+        job_descriptions = [JobDescriptionRequestorOutput.model_validate(item) for item in result]
         logger.info("Successfully fetched all job descriptions.")
         return job_descriptions
     except Exception as e:

@@ -102,11 +102,10 @@ def get_all_match_results(db: db_dependency, jobDescription_id: int):
 
 def get_top_3_matches(db: db_dependency, jd_id: int):
     """
-    Fetch the top 3 ranked profiles for a given Job Description ID.
+    Fetch the top 3 ranked profiles for a given Job Description ID, including full consultant profile details.
     """
-    # Query the RankedProfile table for the top 3 results
     try:
-        logger.debug("Fetching top 3 results")
+        logger.debug("Fetching top 3 results with full profile details")
         top_3_profiles = (
             db.query(MatchResult)
             .filter(MatchResult.job_description_id == jd_id)
@@ -115,22 +114,40 @@ def get_top_3_matches(db: db_dependency, jd_id: int):
             .all()
         )
 
-        # Serialize the response
-        serialized_results = [
-            {
-                "profile_id": profile.consultant_id,
-                "rank": profile.rank,
+        # Fetch and serialize the full consultant profile for each match
+        serialized_results = []
+        for profile in top_3_profiles:
+            consultant = db.query(ConsultantProfile).filter(ConsultantProfile.id == profile.consultant_id).first()
+            if consultant:
+                # Handle Enum or str for availability
+                if hasattr(consultant.availability, 'value'):
+                    availability = consultant.availability.value
+                elif hasattr(consultant.availability, 'name'):
+                    availability = consultant.availability.name
+                else:
+                    availability = str(consultant.availability)
+                consultant_data = {
+                    "id": consultant.id,
+                    "name": consultant.name,
+                    "skills": consultant.skills,
+                    "experience": consultant.experience,
+                    "location": consultant.location,
+                    "availability": availability,
+                }
+            else:
+                consultant_data = None
+            serialized_results.append({
+                "profile": consultant_data,
                 "similarity_score": profile.similarity_score,
-                "ranked_at": profile.matched_at.isoformat() if profile.matched_at else None,
-            }
-            for profile in top_3_profiles
-        ]
+                "rank": profile.rank,
+                "ranked_at": profile.matched_at.isoformat() if (profile.matched_at is not None) else None,
+            })
 
         return serialized_results
     except HTTPException as http_exc:
         raise http_exc
     except Exception as e:
-        logger.error(f"Error occurred while fetching match result by ID {id}: {e}")
+        logger.error(f"Error occurred while fetching match result by ID {jd_id}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred while fetching the match result."

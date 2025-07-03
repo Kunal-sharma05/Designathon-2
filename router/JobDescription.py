@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status, HTTPException, Query, Path, Uplo
 from crud import JobDescription as job_description_service
 from crud import MatchResult as match_result_service
 from db.database import db_dependency
-from schema.JobDescription import JobDescriptionRequest
+from schema.JobDescription import JobDescriptionRequest, JobDescriptionRequestorOutput
 from core.security import get_current_user
 from typing import Annotated
 from PyPDF2 import PdfReader
@@ -15,7 +15,7 @@ router = APIRouter()
 
 
 # GET all job descriptions
-@router.get("/", status_code=status.HTTP_200_OK)
+@router.get("/", response_model=list[JobDescriptionRequestorOutput], status_code=status.HTTP_200_OK)
 async def read_all_job_descriptions(user: Annotated[dict, Depends(get_current_user)], db: db_dependency):
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not authorized")
